@@ -201,6 +201,24 @@ export class CoursesService {
       totalSteps: totalSteps,
     };
   }
+
+  async getCourseProgress(courseId: number) {
+    if(isNaN(courseId)) {
+      throw new BadRequestException("Invalid courseId, should be a number");
+    }
+    try {
+      const courseProgress = await this.prisma.userCourseProgress.findMany({
+        where: {
+          courseId: courseId,
+        }
+      })
+  
+      return {data: courseProgress};
+    } catch (error) {
+      console.log(error)
+      throw new NotFoundException("Progress not found");
+    }
+  }
   
   
   async deleteCourse(courseId: number) {

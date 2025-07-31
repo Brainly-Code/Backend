@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateLessonDto, CreateLessonProgressDto, TrackLessonProgressDto } from './dto';
 
@@ -240,13 +240,21 @@ export class LessonService {
   }
 
   async getLessonProgress(lessonId: number) {
-    const lessonProgress = await this.prisma.userLessonProgress.findMany({
-      where: {
-        lessonId: lessonId,
-      }
-    })
-
-    return {data: lessonProgress};
+    if(isNaN(lessonId)) {
+      throw new BadRequestException("Invalid lessonId, should be a number");
+    }
+    try {
+      const lessonProgress = await this.prisma.userLessonProgress.findMany({
+        where: {
+          lessonId: lessonId,
+        }
+      })
+  
+      return {data: lessonProgress};
+    } catch (error) {
+      console.log(error)
+      throw new NotFoundException("Progress not found");
+    }
   }
 
   async getLessonSolution(lessonId: number) {

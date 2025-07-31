@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMiniModuleDto } from './dto';
 import { CreateMiniModuleProgressDto } from './dto/createMiniModuleProgress.dto';
@@ -166,6 +166,24 @@ export class MiniModuleService {
     } catch (error) {
       this.Logger.error(error)
       throw new HttpException("Unable to create progress", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getMiniModuleProgress(miniModuleId: number) {
+    if(isNaN(miniModuleId)) {
+      throw new BadRequestException("Invalid lessonId, should be a number");
+    }
+    try {
+      const miniModuleProgress = await this.prisma.miniModuleProgress.findMany({
+        where: {
+          miniModuleId: miniModuleId,
+        }
+      })
+  
+      return {data: miniModuleProgress};
+    } catch (error) {
+      console.log(error)
+      throw new NotFoundException("Progress not found");
     }
   }
 }

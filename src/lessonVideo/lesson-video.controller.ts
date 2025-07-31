@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Controller, Post, Get, Param, Delete, UploadedFile, UseInterceptors, Body } from '@nestjs/common';
 import { LessonVideoService } from './lesson-video.service';
 import { FileInterceptor } from '@nestjs/platform-express';

@@ -65,5 +65,14 @@ export class CoursesController {
   trackUserCourseProgress(@Param('id') id: number, @Body() userId: number ) {
     return this.coursesService.trackUserCourseProgress(id, userId )
   }
+
+  @Get('/progress/:courseId')
+  GetLessonProgress(@Param('courseId') courseId: number) {
+    if(isNaN(courseId)) {
+      throw new Error("Invalid lessonId, should be number");
+    }
+
+    return this.coursesService.getCourseProgress(courseId);
+  }
 }
 

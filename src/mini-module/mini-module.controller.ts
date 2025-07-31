@@ -22,4 +22,9 @@ export class MiniModuleController {
   createMiniModuleProgress(@Body() dto: CreateMiniModuleProgressDto ) {
     return this.miniModuleService.createminiModuleProgress(dto);
   }
+
+  @Get('/progress/:miniModuleId')
+  async getMiniModuleProgress(@Param('miniModuleId') miniModuleId: number) {
+      return await this.miniModuleService.getMiniModuleProgress(miniModuleId);
+  }
 }

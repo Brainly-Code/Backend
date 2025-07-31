@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCourseModuleDto, CreateModuleProgressDto } from './dto';
 
@@ -94,7 +94,7 @@ export class ModuleService {
     }
   }
 
-  async incrementModuleProgress( id: number, moduleId: number ) {
+  async trackModuleProgress( id: number, moduleId: number ) {
     const miniModules = await this.prisma.miniModule.findMany({
       where: {
         courseModuleId: moduleId,
@@ -159,6 +159,24 @@ export class ModuleService {
     } catch (error) {
       this.Logger.error(error);
       throw new HttpException("Unable track progress: ", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getLessonProgress(moduleId: number) {
+    if(isNaN(moduleId)) {
+      throw new BadRequestException("Invalid lessonId, should be a number");
+    }
+    try {
+      const moduleProgress = await this.prisma.userModuleProgress.findMany({
+        where: {
+          courseModuleId: moduleId,
+        }
+      })
+  
+      return {data: moduleProgress};
+    } catch (error) {
+      console.log(error)
+      throw new NotFoundException("Progress not found");
     }
   }
 }

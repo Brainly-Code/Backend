@@ -1,12 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Param, Patch, UseGuards, UseInterceptors, Req, Body, ParseIntPipe, ValidationPipe } from "@nestjs/common"; // Add Body, ParseIntPipe, ValidationPipe
+import { Controller, Get, Param, Patch, UseGuards, UseInterceptors, Req, ParseIntPipe } from "@nestjs/common"; // Add Body, ParseIntPipe, ValidationPipe
 import { User } from "generated/prisma";
 import { GetUser } from "src/decorator";
 import { UserService } from "./user.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Request } from "express";
 import { JwtGuard } from "src/guard";
-import { EditUserDto,UpgradeUserDto } from "./dto"; // Ensure EditUserDto is imported
 
 
 @Controller("users")

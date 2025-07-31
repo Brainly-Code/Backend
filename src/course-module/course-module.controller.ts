@@ -28,7 +28,16 @@ export class ModuleController {
   }
 
   @Patch('/progress/:id')
-  incrementModuleProgress(@Param('id') id: number, @Body() moduleId: number) {
-    return this.moduleService.incrementModuleProgress(id, moduleId);
+  trackModuleProgress(@Param('id') id: number, @Body() moduleId: number) {
+    return this.moduleService.trackModuleProgress(id, moduleId);
+  }
+
+  @Get('/progress/:moduleId')
+  GetLessonProgress(@Param('moduleId') moduleId: number) {
+    if(isNaN(moduleId)) {
+      throw new Error("Invalid lessonId, should be number");
+    }
+
+    return this.moduleService.getLessonProgress(moduleId);
   }
 }
