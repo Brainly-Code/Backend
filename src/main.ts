@@ -22,7 +22,7 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://192.168.56.1:5173', 'https://8f12417a0f58.ngrok-free.app', 'https://8f12417a0f58.ngrok-free.app/'],
+    origin: ['http://localhost:5173', 'http://192.168.56.1:5173', 'https://frontend-mdy5.onrender.com', "https://frontend-mdy5.onrender.com/"],
     credentials: true,
   });
 
