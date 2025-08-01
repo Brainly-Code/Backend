@@ -70,7 +70,7 @@ model Course {
   category      String
   level         Level
   description   String
-  duration      String? // Duration in weeks
+  duration      String // Duration in weeks
   studentsCount Int      @default(0)
   rating        Float    @default(0.0)
   likes         Int      @default(0)
