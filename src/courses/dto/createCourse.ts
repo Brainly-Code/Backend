@@ -17,7 +17,8 @@ export class CreateCourseDto {
   @IsNotEmpty()
   description!: string;
   
-  duration?: string;
+  @IsOptional()
+  duration?: string | "";
   
   @IsOptional()
   studentsCount!: number;
