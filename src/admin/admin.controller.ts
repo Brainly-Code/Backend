@@ -7,13 +7,11 @@ import { EditUserDto } from './dto';
 @Controller('admin')
 export class AdminController {
   constructor(private adminServices:  AdminService) {}
-  @UseGuards(JwtGuard)
   @Get('stats')
   getDashboardStats() {
     return this.adminServices.getDashboardStats();
   }
 
-  @UseGuards(JwtGuard)
   @Get('')
   getUsers() {
     return this.adminServices.getUsers();
