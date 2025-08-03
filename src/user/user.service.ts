@@ -68,6 +68,33 @@ export class UserService {
     };
   }
 
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+  
+  async createOAuthUser(data: {
+    email: string;
+    name: string;
+    photo?: string;
+    provider: 'google' | 'github';
+  }) {
+    const dummyHash = '$2b$10$k3wlw7EoQ3cCJn5S1e1I9.LY7d8BWTGwM59DAuY4GyIiySE8ep1Me';
+    
+    return this.prisma.user.create({
+      data: {
+        email: data.email,
+        username: data.name,
+        photo: data.photo,
+        provider: data.provider,
+        hash: dummyHash,
+        role: 'USER',
+      },
+    });
+  }
+  
+
   async upgradeUserToPro(userId: number) {
     const userToUpgrade = await this.prisma.user.findUnique({
       where: {

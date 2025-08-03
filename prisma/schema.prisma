@@ -30,16 +30,18 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email     String  @unique
-  hash      String
-  username  String
+  email     String   @unique
+  hash      String  // Made optional for OAuth users
+  username  String?  // Optional if not enforced by OAuth
   role      Role
-  isPremium Boolean @default(false)
+  isPremium Boolean  @default(false)
 
-  courseId Int?
-  course   Course? @relation(fields: [courseId], references: [id])
+  provider  String   @default("local") // 'google' | 'github' | 'local'
+  photo     String?  // URL to OAuth profile photo
 
-  // New relations
+  courseId  Int?
+  course    Course?  @relation(fields: [courseId], references: [id])
+
   ratings        CourseRating[]
   ChallengeLike  ChallengeLike[]
   image          UserProfileImage[]
@@ -52,6 +54,7 @@ model User {
 
   @@map("users")
 }
+
 
 model UserProfileImage {
   id   Int    @id @default(autoincrement())

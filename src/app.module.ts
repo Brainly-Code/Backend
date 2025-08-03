@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { Module } from "@nestjs/common";
-import { AuthModule } from "./auth/auth.module";
+
 import { UserModule } from "./user/user.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule } from "@nestjs/config";
 // import {
-//   ThrottlerGuard,
+//   ThrottlerGuard,3
 //   ThrottlerModule,
 // } from "@nestjs/throttler";
 // import { APP_GUARD } from "@nestjs/core";
@@ -20,6 +20,7 @@ import { CloudinaryModule } from "./cloudinary/cloudinary.module";
 import { ProfileImageModule } from './profile-image/profile-image.module';
 import { ChallengeInstructionsModule } from './challenge-instructions/challenge-instructions.module';
 import { AdminModule } from './admin/admin.module';
+import { AuthModule } from './autho/autho.module';
 
 
 
@@ -44,6 +45,7 @@ import { AdminModule } from './admin/admin.module';
     ProfileImageModule,
     ChallengeInstructionsModule,
     AdminModule,
+    AuthModule,
   ],
 
 })
