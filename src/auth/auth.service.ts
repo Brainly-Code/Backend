@@ -127,12 +127,6 @@ export class AuthService {
     isPremium: boolean, // <-- Add isPremium as a parameter
   ): Promise<{
     access_token: string;
-    user: { // Add a user object to the response for frontend
-      id: number;
-      email: string;
-      role: string;
-      isPremium: boolean;
-    }
   }> {
     const payload = {
       sub: userId,
@@ -153,12 +147,6 @@ export class AuthService {
 
     return {
       access_token: token,
-      user: { // Also return user details directly in the login/signup response
-        id: userId,
-        email: email,
-        role: role,
-        isPremium: isPremium,
-      }
     };
   }
 
