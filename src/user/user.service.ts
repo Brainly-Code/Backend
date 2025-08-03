@@ -4,6 +4,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { GetUser } from "src/decorator";
 import { User } from "generated/prisma";
 import { EditUserDto } from "./dto";
+import * as argon from 'argon2'; // ✅ Use argon2
 
 @Injectable()
 export class UserService {
@@ -34,39 +35,43 @@ export class UserService {
     return currentUser;
   }
 
-  async editUser(userId: number, dto: EditUserDto) {
-    const previousUser = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
 
-    if (!previousUser) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
 
-    const user = await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        isPremium:
-          dto.isPremium !== undefined ? dto.isPremium : previousUser?.isPremium,
-        email: dto.email || previousUser?.email,
-        username: dto.username || previousUser?.username,
-      },
-    });
+async editUser(userId: number, dto: EditUserDto) {
+  const previousUser = await this.prisma.user.findUnique({
+    where: { id: userId },
+  });
 
-    return {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      role: user.role,
-      isPremium: user.isPremium,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+  if (!previousUser) {
+    throw new NotFoundException(`User with ID ${userId} not found`);
   }
+
+  let hashedPassword: string | undefined = undefined;
+  if (dto.password) {
+    hashedPassword = await argon.hash(dto.password); // ✅ Argon2 hash
+  }
+
+  const user = await this.prisma.user.update({
+    where: { id: userId },
+    data: {
+      isPremium: dto.isPremium ?? previousUser.isPremium,
+      email: dto.email || previousUser.email,
+      username: dto.username || previousUser.username,
+      ...(hashedPassword && { hash: hashedPassword }), // ✅ assuming your column is named `hash`
+    },
+  });
+
+  return {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    role: user.role,
+    isPremium: user.isPremium,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+}
+
 
   async upgradeUserToPro(userId: number) {
     const userToUpgrade = await this.prisma.user.findUnique({

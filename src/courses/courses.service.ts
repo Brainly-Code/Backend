@@ -67,42 +67,66 @@ export class CoursesService {
     });
   }
 
-  async getCourseById(courseId: string) {
-    const cId = Number(courseId);
-    if (isNaN(cId)) {
-      throw new Error("courseId is not a valid number");
-    }
+async getCourseById(courseId: number) {
+  // No need to parse or check NaN anymore
+  const course = await this.prisma.course.findUnique({
+    where: { id: courseId },
+  });
 
-    const course = await this.prisma.course.findUnique({
-      where: { id: cId },
-    });
-
-    if (!course) {
-      throw new Error("Course not found");
-    }
-
-    return course;
+  if (!course) {
+    throw new Error("Course not found");
   }
+
+  return course;
+}
+
 
   async getCourses() {
     return this.prisma.course.findMany();
   }
 
-  async likeCourse(id: string) {
-    const courseId = Number(id);
-    if (isNaN(courseId)) {
-      throw new Error("The courseId you provided is not a number");
-    }
+async likeCourse(courseId: number, userId: number) {
+  const existingLike = await this.prisma.courseLike.findUnique({
+    where: {
+      userId_courseId: { userId, courseId },
+    },
+  });
 
-    return this.prisma.course.update({
-      where: { id: courseId },
-      data: {
-        likes: {
-          increment: 1,
-        },
-      },
+  if (existingLike) {
+    // Unlike: delete entry & decrement likes
+    await this.prisma.courseLike.delete({
+      where: { userId_courseId: { userId, courseId } },
     });
+
+    await this.prisma.course.update({
+      where: { id: courseId },
+      data: { likes: { decrement: 1 } },
+    });
+
+    return { liked: false };
+  } else {
+    // Like: create entry & increment likes
+    await this.prisma.courseLike.create({
+      data: { userId, courseId },
+    });
+
+    await this.prisma.course.update({
+      where: { id: courseId },
+      data: { likes: { increment: 1 } },
+    });
+
+    return { liked: true };
   }
+}
+
+  async getUserLikedCourses(userId: number) {
+    const liked = await this.prisma.courseLike.findMany({
+      where: { userId },
+      select: { courseId: true },
+    });
+    return liked.map((like) => like.courseId);
+  }
+
 
   async createUserCourseProgress(dto: CreateUserCourseProgressDto): Promise<{message: string, data: object}> {
     const user = await this.prisma.user.findUnique({ where: { id: dto.userId } });

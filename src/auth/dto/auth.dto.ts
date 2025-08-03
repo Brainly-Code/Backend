@@ -20,7 +20,6 @@ export class AuthDto {
   })
   @IsString()
   @IsNotEmpty()
-  @IsStrongPassword()
   password!: string;
 
   @ApiProperty({
