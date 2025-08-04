@@ -10,24 +10,17 @@ export class LessonVideoService {
     private cloudinary: CloudinaryService,
   ) {}
 
-async create(
-  createLessonVideoDto: CreateLessonVideoDto,
-  file: Express.Multer.File
-) {
-  try {
-    const { miniModuleId, title } = createLessonVideoDto;
+async create(createLessonVideoDto: CreateLessonVideoDto, file: Express.Multer.File) {
+  const { miniModuleId, title } = createLessonVideoDto;
+  const url = await this.cloudinary.uploadVideo(file);
 
-    // Upload video to Cloudinary
-    const url = await this.cloudinary.uploadVideo(file);
-
-    // Find highest lesson number under this miniModule
-    const latestLesson = await this.prisma.lesson.findFirst({
+  return await this.prisma.$transaction(async (prisma) => {
+    const latestLesson = await prisma.lesson.findFirst({
       where: { miniModuleId },
       orderBy: { number: 'desc' },
     });
 
-    // Find highest lessonVideo number under this miniModule
-    const latestVideo = await this.prisma.lessonVideo.findFirst({
+    const latestVideo = await prisma.lessonVideo.findFirst({
       where: { miniModuleId },
       orderBy: { number: 'desc' },
     });
@@ -35,22 +28,19 @@ async create(
     const highestLessonNumber = latestLesson?.number || 0;
     const highestVideoNumber = latestVideo?.number || 0;
 
-      const nextNumber = Math.max(highestLessonNumber, highestVideoNumber) + 1;
+    const nextNumber = Math.max(highestLessonNumber, highestVideoNumber) + 1;
 
-      // Create the lesson video
-      return await this.prisma.lessonVideo.create({
-        data: {
-          title,
-          number: nextNumber,
-          miniModuleId,
-          url,
-        },
-      });
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  }
+    return await prisma.lessonVideo.create({
+      data: {
+        title,
+        number: nextNumber,
+        miniModuleId,
+        url,
+      },
+    });
+  });
+}
+
 
 
   async findAll() {

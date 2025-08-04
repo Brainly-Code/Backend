@@ -193,11 +193,13 @@ model Lesson {
 model LessonVideo {
   id     Int    @id @default(autoincrement())
   title  String
-  number Int    @unique()
+  number Int    
   url    String // Cloudinary video URL
 
   miniModuleId Int
   miniModule   MiniModule @relation(fields: [miniModuleId], references: [id])
+
+  @@unique([miniModuleId, number])
 }
 
 model LessonSolution {

@@ -9,79 +9,91 @@ export class LessonService {
   constructor(private prisma: PrismaService) {}
 
   async createLesson(dto: CreateLessonDto) {
-    try {
-      // 1. Get the highest lesson number under the same miniModuleId
-      const lastLesson = await this.prisma.lesson.findFirst({
-        where: {
-          miniModuleId: dto.miniModuleId,
-        },
-        orderBy: {
-          number: 'desc',
-        },
-      });
+  try {
+    // 1. Get the highest lesson number in the same miniModule
+    const highestLesson = await this.prisma.lesson.findFirst({
+      where: {
+        miniModuleId: dto.miniModuleId,
+      },
+      orderBy: {
+        number: 'desc',
+      },
+    });
 
-      // 2. Determine the next number
-      const nextNumber = lastLesson ? lastLesson.number + 1 : 1;
+    // 2. Get the highest lessonVideo number in the same miniModule
+    const highestVideo = await this.prisma.lessonVideo.findFirst({
+      where: {
+        miniModuleId: dto.miniModuleId,
+      },
+      orderBy: {
+        number: 'desc',
+      },
+    });
 
-      // 3. Create the lesson
-      const lesson = await this.prisma.lesson.create({
-        data: {
-          miniModuleId: dto.miniModuleId,
-          title: dto.title,
-          explanation: dto.explanation,
-          more: dto.more,
-          example: dto.example,
-          note: dto.note,
-          assignment: dto.assignment,
-          number: nextNumber,
-          },
-        });
+    // 3. Calculate the next available number
+    const lessonNumber = highestLesson?.number || 0;
+    const videoNumber = highestVideo?.number || 0;
+    const nextNumber = Math.max(lessonNumber, videoNumber) + 1;
 
-        // 4. Find the Course related to this lesson
-        const course = await this.prisma.course.findFirst({
-          where: {
-            modules: {
+    // 4. Create the lesson
+    const lesson = await this.prisma.lesson.create({
+      data: {
+        miniModuleId: dto.miniModuleId,
+        title: dto.title,
+        explanation: dto.explanation,
+        more: dto.more,
+        example: dto.example,
+        note: dto.note,
+        assignment: dto.assignment,
+        number: nextNumber,
+      },
+    });
+
+    // 5. Find the related course
+    const course = await this.prisma.course.findFirst({
+      where: {
+        modules: {
+          some: {
+            miniModules: {
               some: {
-                miniModules: {
+                lessons: {
                   some: {
-                    lessons: {
-                      some: {
-                        id: lesson.id,
-                      },
-                    },
+                    id: lesson.id,
                   },
                 },
               },
             },
           },
-        });
+        },
+      },
+    });
 
-        if (course) {
-          // 5. Count all lessons in this course
-          const totalLessons = await this.prisma.lesson.count({
-            where: {
-              miniModule: {
-                courseModule: {
-                  courseId: course.id,
-                },
-              },
+    if (course) {
+      // 6. Count total lessons in the course
+      const totalLessons = await this.prisma.lesson.count({
+        where: {
+          miniModule: {
+            courseModule: {
+              courseId: course.id,
             },
-          });
-          const totalLessonsDuration = `${totalLessons}`;
+          },
+        },
+      });
 
-          // 6. Update course duration with the total number of lessons
-          await this.prisma.course.update({
-            where: { id: course.id },
-            data: { duration: totalLessonsDuration },
-          });
-        }
-
-        return lesson;
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
+      // 7. Update course duration with the number of lessons
+      await this.prisma.course.update({
+        where: { id: course.id },
+        data: { duration: `${totalLessons}` },
+      });
     }
+
+    return lesson;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 
 
 
