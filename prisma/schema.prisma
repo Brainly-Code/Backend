@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://backend_mlvp_user:3IfUa1JfrfdEmm9XJ4tuQQiagM4zPynR@dpg-d269feeuk2gs73boqacg-a.oregon-postgres.render.com/backend_mlvp"
 }
 
 enum Role {
@@ -71,7 +71,7 @@ model Course {
   category      String
   level         Level
   description   String
-  duration      String? // Duration in weeks
+  duration      String  @default("") // Duration in weeks
   studentsCount Int      @default(0)
   rating        Float    @default(0.0)
   likes         Int      @default(0)

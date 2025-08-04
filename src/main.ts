@@ -6,6 +6,11 @@ import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { resolve } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import dotenv from 'dotenv';
+
+// 👇 Force specific file:
+dotenv.config({ path: '.env' });
+
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
