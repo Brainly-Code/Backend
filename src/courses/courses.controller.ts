@@ -15,6 +15,7 @@ import { CoursesService } from "./courses.service";
 import { JwtGuard } from "src/guard";
 import { GetUser } from "src/decorator";
 import { ParseIntPipe } from '@nestjs/common';
+import { Headers } from '@nestjs/common';
 
 @Controller('courses')
 export class CoursesController {
@@ -40,11 +41,27 @@ export class CoursesController {
     return this.coursesService.getCoursesByCreator(userId);
   }
 
- 
-@Get('/:id')
-getCourseById(@Param('id', ParseIntPipe) id: number) {
-  return this.coursesService.getCourseById(id);
+  @UseGuards(JwtGuard)
+@Get('/liked-courses')
+async getUserLikedCourses(
+  @Headers() reqHeaders: any,
+  @GetUser('id') userId: any,
+) {
+  
+  try {
+    const id = Number(userId);
+    if (isNaN(id)) throw new BadRequestException('Invalid user id');
+    return await this.coursesService.getUserLikedCourses(id);
+  } catch (error) {
+    console.error('Failed to get liked courses:', error);
+    throw error;
+  }
 }
+ 
+  @Get('/:id')
+  getCourseById(@Param('id', ParseIntPipe) id: number) {
+    return this.coursesService.getCourseById(id);
+  }
 
   @Delete(':id')
   deleteCourse(@Param('id') id: string) {
@@ -62,18 +79,7 @@ getCourseById(@Param('id', ParseIntPipe) id: number) {
     return this.coursesService.likeCourse(Number(courseId), userId); // method name is LikeCourse in your service
   }
 
-  @UseGuards(JwtGuard)
-  @Get('/liked-courses')
-  async getUserLikedCourses(@GetUser('id') userId: any) {
-    try {
-      const id = Number(userId);
-      if (isNaN(id)) throw new BadRequestException('Invalid user id');
-      return await this.coursesService.getUserLikedCourses(id);
-    } catch (error) {
-      console.error('Failed to get liked courses:', error);
-      throw error;
-    }
-  }
+
 
   @Post('/progress')
   createUserCourseProgress(@Body() dto: CreateUserCourseProgressDto) {
