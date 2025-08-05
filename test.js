@@ -1,14 +1,5 @@
 /* eslint-disable prettier/prettier */
-import pkg from 'pg';
-const { Client } = pkg;
+import dotenv from 'dotenv';
+dotenv.config();
 
-
-console.log("DATABASE_URL:", process.env.DATABASE_URL);
-
-const client = new Client({
-  connectionString: process.env.DATABASE_URL
-});
-
-client.connect()
-  .then(() => console.log('Connected!'))
-  .catch(err => console.error('Connection failed:', err));
+console.log('DATABASE_URL:', process.env.DATABASE_URL);

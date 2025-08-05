@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://backend_mlvp_user:3IfUa1JfrfdEmm9XJ4tuQQiagM4zPynR@dpg-d269feeuk2gs73boqacg-a.oregon-postgres.render.com/backend_mlvp"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -49,7 +49,7 @@ model User {
   userModuleProgress userModuleProgress[]
   MiniModuleProgress MiniModuleProgress[]
   userLessonProgress UserLessonProgress[]
-  courseLikes CourseLike[]
+  courseLikes        CourseLike[]
 
   @@map("users")
 }
@@ -71,7 +71,7 @@ model Course {
   category      String
   level         Level
   description   String
-  duration      String  @default("") // Duration in weeks
+  duration      String   @default("") // Duration in weeks
   studentsCount Int      @default(0)
   rating        Float    @default(0.0)
   likes         Int      @default(0)
@@ -84,7 +84,7 @@ model Course {
   ratings  CourseRating[]
   videos   Video[]
   users    User[]
-  likedBy CourseLike[]
+  likedBy  CourseLike[]
 }
 
 model CourseLike {
@@ -193,7 +193,7 @@ model Lesson {
 model LessonVideo {
   id     Int    @id @default(autoincrement())
   title  String
-  number Int    
+  number Int
   url    String // Cloudinary video URL
 
   miniModuleId Int

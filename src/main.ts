@@ -6,10 +6,6 @@ import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { resolve } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
-import dotenv from 'dotenv';
-
-// 👇 Force specific file:
-dotenv.config({ path: '.env' });
 
 
 async function bootstrap() {
@@ -46,7 +42,7 @@ async function bootstrap() {
 
   // ✅ Increase HTTP server timeout to 10 minutes
   const server = app.getHttpServer();
-  server.setTimeout(10 * 60 * 1000); // 10 mins
+  server.setTimeout(20 * 60 * 1000); // 10 mins
 
 
   await app.listen(process.env.PORT ?? 3000);
