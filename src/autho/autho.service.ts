@@ -18,13 +18,14 @@ export class AuthService {
     // Check if user exists by email
     let user = await this.userService.findByEmail(oauthUser.email);
 
+
     // Create new OAuth user if none exists
     if (!user) {
       user = await this.userService.createOAuthUser(oauthUser);
     }
 
     // Create JWT payload
-    const payload = { sub: user.id, email: user.email, username: user.username, role: user.role };
+    const payload = { sub: user.id, email: user.email, username: user.username, role: user.role,isPremium:user.isPremium };
     const access_token = this.jwtService.sign(payload);
 
     return { access_token, user };

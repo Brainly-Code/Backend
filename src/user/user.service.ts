@@ -4,6 +4,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { GetUser } from "src/decorator";
 import { User } from "generated/prisma";
 import { EditUserDto } from "./dto";
+import * as argon from 'argon2'; // ✅ Use argon2
 
 @Injectable()
 export class UserService {
@@ -34,28 +35,31 @@ export class UserService {
     return currentUser;
   }
 
-  async editUser(userId: number, dto: EditUserDto) {
-    const previousUser = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
 
-    if (!previousUser) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
 
-    const user = await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        isPremium:
-          dto.isPremium !== undefined ? dto.isPremium : previousUser?.isPremium,
-        email: dto.email || previousUser?.email,
-        username: dto.username || previousUser?.username,
-      },
-    });
+async editUser(userId: number, dto: EditUserDto) {
+  const previousUser = await this.prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!previousUser) {
+    throw new NotFoundException(`User with ID ${userId} not found`);
+  }
+
+  let hashedPassword: string | undefined = undefined;
+  if (dto.password) {
+    hashedPassword = await argon.hash(dto.password); // ✅ Argon2 hash
+  }
+
+  const user = await this.prisma.user.update({
+    where: { id: userId },
+    data: {
+      isPremium: dto.isPremium ?? previousUser.isPremium,
+      email: dto.email || previousUser.email,
+      username: dto.username || previousUser.username,
+      ...(hashedPassword && { hash: hashedPassword }), // ✅ assuming your column is named `hash`
+    },
+  });
 
     return {
       id: user.id,
@@ -67,33 +71,6 @@ export class UserService {
       updatedAt: user.updatedAt,
     };
   }
-
-  async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
-      where: { email },
-    });
-  }
-  
-  async createOAuthUser(data: {
-    email: string;
-    name: string;
-    photo?: string;
-    provider: 'google' | 'github';
-  }) {
-    const dummyHash = '$2b$10$k3wlw7EoQ3cCJn5S1e1I9.LY7d8BWTGwM59DAuY4GyIiySE8ep1Me';
-    
-    return this.prisma.user.create({
-      data: {
-        email: data.email,
-        username: data.name,
-        photo: data.photo,
-        provider: data.provider,
-        hash: dummyHash,
-        role: 'USER',
-      },
-    });
-  }
-  
 
   async upgradeUserToPro(userId: number) {
     const userToUpgrade = await this.prisma.user.findUnique({
@@ -123,5 +100,29 @@ export class UserService {
     });
 
     return updatedUser;
+  }
+
+  async findByEmail(email: string) {
+    return await this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+  async createOAuthUser(oauthUser: {
+    email: string;
+    name: string;
+    photo?: string;
+    provider: 'google' | 'github';
+  }) {
+    return await this.prisma.user.create({
+      data: {
+        email: oauthUser.email,
+        username: oauthUser.name,
+        photo: oauthUser.photo,
+        provider: oauthUser.provider,
+        hash: "hashedPassword",
+        role: 'USER',
+        isPremium: false,
+      },
+    });
   }
 }

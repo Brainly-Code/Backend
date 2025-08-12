@@ -51,6 +51,7 @@ model User {
   userModuleProgress userModuleProgress[]
   MiniModuleProgress MiniModuleProgress[]
   userLessonProgress UserLessonProgress[]
+  courseLikes        CourseLike[]
 
   @@map("users")
 }
@@ -73,7 +74,7 @@ model Course {
   category      String
   level         Level
   description   String
-  duration      String // Duration in weeks
+  duration      String   @default("") // Duration in weeks
   studentsCount Int      @default(0)
   rating        Float    @default(0.0)
   likes         Int      @default(0)
@@ -86,6 +87,18 @@ model Course {
   ratings  CourseRating[]
   videos   Video[]
   users    User[]
+  likedBy  CourseLike[]
+}
+
+model CourseLike {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
 }
 
 model UserCourseProgress {
@@ -183,11 +196,13 @@ model Lesson {
 model LessonVideo {
   id     Int    @id @default(autoincrement())
   title  String
-  number Int    @unique()
+  number Int
   url    String // Cloudinary video URL
 
   miniModuleId Int
   miniModule   MiniModule @relation(fields: [miniModuleId], references: [id])
+
+  @@unique([miniModuleId, number])
 }
 
 model LessonSolution {

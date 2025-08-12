@@ -30,5 +30,9 @@ export class EditUserDto {
   email?: string;
 
   @IsOptional()
+  @IsString()
+  password?: string; 
+
+  @IsOptional()
   isPremium?: boolean;
 }

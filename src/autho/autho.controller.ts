@@ -35,6 +35,7 @@ export class AuthController {
       const { access_token } = await this.authService.validateOAuthLogin(oauthUser);
 
       const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+      
       return res.redirect(`${frontendUrl}/user?token=${access_token}`);
       
     } catch (err: any) {
