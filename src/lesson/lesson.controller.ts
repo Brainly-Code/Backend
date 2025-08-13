@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { LessonService } from './lesson.service';
-import { CreateLessonDto, CreateLessonProgressDto, TrackLessonProgressDto } from './dto';
+import { CreateLessonDto, CreateLessonProgressDto, CreateLessonSolutionDto, TrackLessonProgressDto } from './dto';
 
 @Controller('lesson')
 export class LessonController {
@@ -47,6 +47,11 @@ export class LessonController {
     }
 
     return this.lessonService.getLessonProgress(lessonId);
+  }
+
+  @Post('/solution')
+  async createLessonSolution(@Body() dto: CreateLessonSolutionDto ) {
+    return this.lessonService.createLessonSolution(dto);
   }
 
   @Get('/solution/:lessonId')

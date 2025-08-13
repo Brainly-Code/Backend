@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateLessonDto, CreateLessonProgressDto, TrackLessonProgressDto } from './dto';
+import { CreateLessonDto, CreateLessonProgressDto, CreateLessonSolutionDto, TrackLessonProgressDto } from './dto';
 
 @Injectable()
 export class LessonService {
@@ -267,6 +267,32 @@ export class LessonService {
       console.log(error)
       throw new NotFoundException("Progress not found");
     }
+  }
+
+  async createLessonSolution(dto: CreateLessonSolutionDto) {
+    const lesson = await this.prisma.lesson.findUnique({
+      where: {
+        id: dto.lessonId
+      }
+    })
+    if(!lesson) {
+      throw new NotFoundException("Lesson Not Found")
+    }
+    
+    try {
+      const lessonSolution =  await this.prisma.lessonSolution.create({
+        data: dto
+      })
+    
+      return {
+        message: "Solution created successfully",
+        data: lessonSolution
+      }
+    } catch (error) {
+      this.Logger.error(error);
+      throw new HttpException("Unable to create progress", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
   }
 
   async getLessonSolution(lessonId: number) {
