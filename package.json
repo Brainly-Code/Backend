@@ -44,6 +44,7 @@
     "class-validator": "^0.14.2",
     "cloudinary": "^2.7.0",
     "diff": "^8.0.2",
+    "dotenv": "^17.2.1",
     "dotenv-cli": "^8.0.0",
     "multer": "^2.0.1",
     "passport": "^0.7.0",

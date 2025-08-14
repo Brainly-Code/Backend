@@ -29,7 +29,10 @@ import { AuthModule } from "./auth/auth.module";
     //   ttl: 60,
     //   limit: 5,
     // }),
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ 
+      isGlobal: true,
+      envFilePath: '.env'
+    }),
     AuthModule,
     UserModule,
     PrismaModule,
