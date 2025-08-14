@@ -97,6 +97,13 @@ export class AuthService {
       );
     }
 
+    // Check if user has a password hash (OAuth users might not have one)
+    if (!user.hash) {
+      throw new ForbiddenException(
+        "This account was created with OAuth. Please use OAuth to sign in.",
+      );
+    }
+
     //Compare passwords
     const pwMatches = await argon.verify(
       user.hash,

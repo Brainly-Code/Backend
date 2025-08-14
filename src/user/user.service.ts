@@ -61,17 +61,16 @@ async editUser(userId: number, dto: EditUserDto) {
     },
   });
 
-  return {
-    id: user.id,
-    email: user.email,
-    username: user.username,
-    role: user.role,
-    isPremium: user.isPremium,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-  };
-}
-
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      isPremium: user.isPremium,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
 
   async upgradeUserToPro(userId: number) {
     const userToUpgrade = await this.prisma.user.findUnique({
@@ -101,5 +100,29 @@ async editUser(userId: number, dto: EditUserDto) {
     });
 
     return updatedUser;
+  }
+
+  async findByEmail(email: string) {
+    return await this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+  async createOAuthUser(oauthUser: {
+    email: string;
+    name: string;
+    photo?: string;
+    provider: 'google' | 'github';
+  }) {
+    return await this.prisma.user.create({
+      data: {
+        email: oauthUser.email,
+        username: oauthUser.name,
+        photo: oauthUser.photo,
+        provider: oauthUser.provider,
+        hash: "hashedPassword",
+        role: 'USER',
+        isPremium: false,
+      },
+    });
   }
 }
