@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // src/autho/autho.module.ts
 import { Module } from "@nestjs/common";
 import { PassportModule } from "@nestjs/passport";
