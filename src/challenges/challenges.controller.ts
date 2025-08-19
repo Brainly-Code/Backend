@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { BadRequestException, Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Put, Delete } from '@nestjs/common';
 import { ChallengesService } from './challenges.service';
 import { CreateChallengeDto } from './dto/createChallenge.dto';
 import { CreateChallengeInstructionDto, CreateChallengeSolutionDto } from './dto';
@@ -25,7 +25,12 @@ export class ChallengesController {
 
   @Get('/:id')
   getChallengeById(@Param('id') id: string){
-    return this.challengeService.getChallengeById(id);
+    return this.challengeService.getChallengeById(id)
+  }
+
+  @Put('/:id')
+  updateChallenge(@Param('id') id: string, @Body() dto: any) {
+    return this.challengeService.updateChallenge(id, dto)
   }
 
   @Post('/instruction')
@@ -40,6 +45,16 @@ export class ChallengesController {
     }
 
     return this.challengeService.getChallengeInstructions(challengeId)
+  }
+
+  @Put('/instruction/:id')
+  updateChallengeInstruction(@Param('id') id: string, @Body() dto: any) {
+    return this.challengeService.updateChallengeInstruction(id, dto)
+  }
+
+  @Delete('/instruction/:id')
+  deleteChallengeInstruction(@Param('id') id: string) {
+    return this.challengeService.deleteChallengeInstruction(id)
   }
 
   @Post('solution')

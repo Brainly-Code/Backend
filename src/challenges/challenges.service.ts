@@ -25,6 +25,25 @@ export class ChallengesService {
     }
   }
 
+  async updateChallenge(id: string, dto: any) {
+    const challengeId = Number(id);
+
+    if(isNaN(challengeId)){
+      return "Challenge id is not a number";
+    }
+
+    try {
+      const updatedChallenge = await this.prisma.challenge.update({
+        where: { id: challengeId },
+        data: dto
+      });
+
+      return updatedChallenge;
+    } catch (error) {
+      this.logger.error('Request failed:',error);
+      return "Failed to update challenge";
+    }
+  }
 
   async incrementLikes(challengeId: string) {
     const cId = Number(challengeId);
@@ -119,6 +138,45 @@ export class ChallengesService {
      }
     })
   }  
+
+  async updateChallengeInstruction(id: string, dto: any) {
+    const instructionId = Number(id);
+
+    if(isNaN(instructionId)){
+      return "Instruction id is not a number";
+    }
+
+    try {
+      const updatedInstruction = await this.prisma.challengeInstructions.update({
+        where: { id: instructionId },
+        data: dto
+      });
+
+      return updatedInstruction;
+    } catch (error) {
+      this.logger.error('Request failed:',error);
+      return "Failed to update instruction";
+    }
+  }
+
+  async deleteChallengeInstruction(id: string) {
+    const instructionId = Number(id);
+
+    if(isNaN(instructionId)){
+      return "Instruction id is not a number";
+    }
+
+    try {
+      await this.prisma.challengeInstructions.delete({
+        where: { id: instructionId }
+      });
+
+      return { message: "Instruction deleted successfully" };
+    } catch (error) {
+      this.logger.error('Request failed:',error);
+      return "Failed to delete instruction";
+    }
+  }
 
   async createChallengeSolution(dto: CreateChallengeSolutionDto) {
     if(!dto.challengeId) {
