@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
 
 import { BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateChallengeDto } from './dto/createChallenge.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateChallengeInstructionDto, CreateChallengeSolutionDto } from './dto';
 
 @Injectable()
 export class ChallengesService {
@@ -93,6 +95,53 @@ export class ChallengesService {
       throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
+  }
+
+  async createChallengeInstruction(dto: CreateChallengeInstructionDto ) {
+    if(!dto.challengeId) {
+      throw new NotFoundException("Challenge not found!");
+    }
+    try {
+      const challengeInstruction = await this.prisma.challengeInstructions.create({
+        data: dto
+      })
+      return {"Message" : "Solution creation was successfull"};
+    } catch (error) {
+      this.logger.error('Request failed:',error)
+      throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getChallengeInstructions(challengeId: number) {
+    return await this.prisma.challengeInstructions.findMany({
+     where: {
+       challengeId: challengeId
+     }
+    })
+  }  
+
+  async createChallengeSolution(dto: CreateChallengeSolutionDto) {
+    if(!dto.challengeId) {
+      throw new NotFoundException("Challenge not found!");
+    }
+    try {
+      const challengeSolution = await this.prisma.challengeSolutions.create({
+        data: dto
+      })
+
+      return {"Message" : "Solution creation was successfull"};
+    } catch (error) {
+      this.logger.error('Request failed:',error)
+      throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getChallengeSolution(challengeId: number) {
+     return await this.prisma.challengeSolutions.findMany({
+      where: {
+        challengeId: challengeId
+      }
+     })
   }
   
 }

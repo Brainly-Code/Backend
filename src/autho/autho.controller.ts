@@ -36,13 +36,13 @@ export class AuthController {
 
       const { access_token } = await this.authService.validateOAuthLogin(oauthUser);
 
-      const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+      const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
       console.log("frontendUrl", access_token);
       return res.redirect(`${frontendUrl}/user?token=${access_token}`);
       
     } catch (err: any) {
       console.error('Error in googleAuthRedirect:', err);
-      const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+      const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
       return res.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(err.message)}`);
     }
   }
@@ -90,11 +90,11 @@ export class AuthController {
 
       const { access_token } = await this.authService.validateOAuthLogin(oauthUser);
 
-      const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+      const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
       return res.redirect(`${frontendUrl}/user?token=${access_token}`);
     } catch (err: any) {
       console.error('Error in githubAuthRedirect:', err);
-      const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+      const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
       return res.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(err.message)}`);
     }
   }
