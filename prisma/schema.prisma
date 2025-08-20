@@ -54,6 +54,7 @@ model User {
   courseLikes        CourseLike[]
 
   @@map("users")
+  CompletedChallenges CompletedChallenges[]
 }
 
 
@@ -88,6 +89,7 @@ model Course {
   videos   Video[]
   users    User[]
   likedBy  CourseLike[]
+  completedChallenges CompletedChallenges[]
 }
 
 model CourseLike {
@@ -243,12 +245,13 @@ model Challenge {
   description String
   relation    String?
   duration    String
-  completions Int     @default(0)
   likes       Int     @default(0)
 
   instructions ChallengeInstructions[]
   likesList    ChallengeLike[]
   solutions    ChallengeSolutions[]
+
+  completions CompletedChallenges[]
 }
 
 model ChallengeLike {
@@ -277,4 +280,15 @@ model ChallengeSolutions {
 
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id])
+}
+
+model CompletedChallenges {
+  id    Int @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  challengeId Int 
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+
+
+  Course Course[]
 }

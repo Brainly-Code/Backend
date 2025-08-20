@@ -4,7 +4,7 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateChallengeDto } from './dto/createChallenge.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateChallengeInstructionDto, CreateChallengeSolutionDto } from './dto';
+import { CreateChallengeCompleter, CreateChallengeInstructionDto, CreateChallengeSolutionDto } from './dto';
 
 @Injectable()
 export class ChallengesService {
@@ -200,6 +200,42 @@ export class ChallengesService {
         challengeId: challengeId
       }
      })
+  }
+
+  async createChallengeCompleter(dto: CreateChallengeCompleter) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: dto.userId,
+      }
+    })
+
+    const challenge = await this.prisma.challenge.findUnique({
+      where: {
+        id: dto.challengeId,
+      }
+    })
+
+    if(!user) {
+      throw new NotFoundException("User not found!");
+    }
+
+    if(!challenge) {
+      throw new NotFoundException("Challenge not found!");
+    }
+    try {
+      const challengeCompleter = await this.prisma.completedChallenges.create({
+        data: dto
+      });
+
+      return {
+        message: "Completer created"
+      }
+    } catch (error) {
+      this.logger.error(error)
+      throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
   }
   
 }

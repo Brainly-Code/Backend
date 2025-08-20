@@ -92,4 +92,14 @@ export class AdminService {
 
   }
 
+  async getLessonCompleters(challengeId: number) {
+    const challengeCompleters = await this.prisma.completedChallenges.findMany({
+      where: {
+        challengeId: challengeId,
+      }
+    })
+
+    return {data: challengeCompleters}
+  }
+
 }

@@ -36,4 +36,9 @@ export class AdminController {
   createLessonSolution(@Body() dto: {lessonId: number, solution: string}) {
     return this.adminServices.createLessonSolution(dto);
   }
+
+  @Get('/challenge-completers/:challengeId')
+  GetLessonCompleters(@Param('challengeId') challengeId: number) {
+    return this.adminServices.getLessonCompleters(challengeId);
+  }
 }

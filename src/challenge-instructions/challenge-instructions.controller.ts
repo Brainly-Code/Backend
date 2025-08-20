@@ -2,7 +2,6 @@
 import { Body, Controller, Get, Param, Post, Put, Delete } from '@nestjs/common';
 import { ChallengeInstructionsService } from './challenge-instructions.service';
 import { createChallengeInstructionDto, updateChallengeInstructionDto } from './dto';
-import { ParseIntPipe } from '@nestjs/common';
 
 @Controller('challenge-instructions')
 export class ChallengeInstructionsController {

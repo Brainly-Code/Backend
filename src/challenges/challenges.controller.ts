@@ -2,7 +2,7 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Put, Delete } from '@nestjs/common';
 import { ChallengesService } from './challenges.service';
 import { CreateChallengeDto } from './dto/createChallenge.dto';
-import { CreateChallengeInstructionDto, CreateChallengeSolutionDto } from './dto';
+import { CreateChallengeCompleter, CreateChallengeInstructionDto, CreateChallengeSolutionDto } from './dto';
 
 @Controller('challenges')
 export class ChallengesController {
@@ -70,4 +70,10 @@ export class ChallengesController {
 
     return this.challengeService.getChallengeSolution(challengeId)
   }
+
+  @Post('/challenge-completer')
+  createChallengeCompleter(@Body() dto: CreateChallengeCompleter) {
+    return this.challengeService.createChallengeCompleter(dto);
+  } 
+
 }
