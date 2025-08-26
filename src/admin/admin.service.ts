@@ -93,13 +93,25 @@ export class AdminService {
   }
 
   async getLessonCompleters(challengeId: number) {
-    const challengeCompleters = await this.prisma.completedChallenges.findMany({
-      where: {
-        challengeId: challengeId,
-      }
-    })
+  const challengeCompleters = await this.prisma.completedChallenges.findMany({
+    where: { challengeId }
+  });
 
-    return {data: challengeCompleters}
-  }
+  const completerUsers = await Promise.all(
+    challengeCompleters.map(async (challengeCompleter) => {
+
+      const someObj = {
+        user: await this.prisma.user.findUnique({
+            where: { id: challengeCompleter.userId }
+          }),
+  
+        completionTime: challengeCompleter.createdAt
+      }
+      return someObj
+    })
+  );
+
+  return completerUsers;
+}
 
 }
