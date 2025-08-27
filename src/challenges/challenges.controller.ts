@@ -76,4 +76,9 @@ export class ChallengesController {
     return this.challengeService.createChallengeCompleter(dto);
   } 
 
+  @Post('/challenge-instruction/:instructionId')
+  completeInstruction (@Param('instructionId') instructionId: number) {
+    return this.challengeService.completeStep(instructionId);
+  }
+
 }

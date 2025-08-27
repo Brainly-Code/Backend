@@ -237,5 +237,41 @@ export class ChallengesService {
 
 
   }
+
+  async completeStep (instructionId: number) {
+
+    const instruction = await this.prisma.challengeInstructions.findUnique({
+      where: {
+        id: instructionId
+      }
+    })
+
+    if(instruction?.completed === false) {
+      const challengeInstructionCompletion = await this.prisma.challengeInstructions.update({
+        where: {
+          id: instructionId
+        },
+        data: {
+          completed: true,
+        }
+      })
+
+      return challengeInstructionCompletion
+
+    }else {
+      const challengeInstructionUnCompletion = await this.prisma.challengeInstructions.update({
+        where: {
+          id: instructionId
+        },
+        data: {
+          completed: false,
+        }
+      })
+
+      return challengeInstructionUnCompletion
+
+    }
+  }
+
   
 }
