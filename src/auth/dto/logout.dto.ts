@@ -1,4 +1,4 @@
 /* eslint-disable prettier/prettier */ 
 export class LogoutDto {
-  userId?: string;
+  userId?: number;
 }

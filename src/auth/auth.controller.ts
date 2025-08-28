@@ -7,7 +7,6 @@ import {
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthDto } from "./dto";
-import { LogoutDto } from "./dto/logout.dto";
 import { LoginDto } from "./dto/login.dto";
 // import { Throttle } from "@nestjs/throttler";
 
@@ -38,8 +37,8 @@ export class AuthController {
 
   @Post("logout")
   @HttpCode(200)
-  logout(@Body() dto: LogoutDto) {
-    return this.authService.logout(dto);
+  logout() {
+    return this.authService.logout();
   }
 
 

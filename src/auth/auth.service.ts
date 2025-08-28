@@ -10,7 +10,6 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { ApiBadRequestResponse, ApiResponse } from "@nestjs/swagger";
-import { LogoutDto } from "./dto/logout.dto";
 import { LoginDto } from "./dto/login.dto";
 
 @Injectable()
@@ -150,8 +149,7 @@ export class AuthService {
     };
   }
 
-  logout(res: LogoutDto) {
-    console.log(res)
+  logout() {
     return {message: "Logged out successfully"};
   };
 }
