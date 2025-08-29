@@ -1,12 +1,10 @@
 /* eslint-disable prettier/prettier */
-
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { resolve } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
-
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -24,11 +22,13 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: ["https://frontend-mdy5.onrender.com", "http://localhost:5173", "https://backend-hx6c.onrender.com"],
+    origin: [
+      "https://frontend-mdy5.onrender.com",
+      "http://localhost:5173",
+      "https://backend-hx6c.onrender.com",
+    ],
     credentials: true,
   });
-
-  console.log('Static path:', resolve(__dirname, '..', 'uploads'));
 
   // Swagger
   const config = new DocumentBuilder()
@@ -41,12 +41,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
 
-  // ✅ Increase HTTP server timeout to 10 minutes
   const server = app.getHttpServer();
   server.setTimeout(20 * 60 * 1000); // 10 mins
 
-
   await app.listen(process.env.PORT ?? 3000);
 }
-
 void bootstrap();

@@ -22,6 +22,9 @@ import { ChallengeInstructionsModule } from "./challenge-instructions/challenge-
 import { AdminModule } from "./admin/admin.module";
 import { AuthoModule } from "./autho/autho.module";
 import { AuthModule } from "./auth/auth.module";
+//socket import
+import { ChatGateway } from "./chat.gateway";
+import { ChatModule } from "./messages/message.module";
 
 @Module({
   imports: [
@@ -48,6 +51,8 @@ import { AuthModule } from "./auth/auth.module";
     ChallengeInstructionsModule,
     AdminModule,
     AuthoModule,
+    ChatModule
   ],
+  providers: [ChatGateway],
 })
 export class AppModule {}

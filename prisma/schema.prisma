@@ -30,17 +30,17 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email     String   @unique
-  hash      String  // Made optional for OAuth users
-  username  String?  // Optional if not enforced by OAuth
+  email     String  @unique
+  hash      String // Made optional for OAuth users
+  username  String? // Optional if not enforced by OAuth
   role      Role
-  isPremium Boolean  @default(false)
+  isPremium Boolean @default(false)
 
-  provider  String   @default("local") // 'google' | 'github' | 'local'
-  photo     String?  // URL to OAuth profile photo
+  provider String  @default("local") // 'google' | 'github' | 'local'
+  photo    String? // URL to OAuth profile photo
 
-  courseId  Int?
-  course    Course?  @relation(fields: [courseId], references: [id])
+  courseId Int?
+  course   Course? @relation(fields: [courseId], references: [id])
 
   ratings        CourseRating[]
   ChallengeLike  ChallengeLike[]
@@ -48,15 +48,17 @@ model User {
   createdCourses Course[]             @relation("CreatedCourses")
   progress       UserCourseProgress[]
 
-  userModuleProgress userModuleProgress[]
-  MiniModuleProgress MiniModuleProgress[]
-  userLessonProgress UserLessonProgress[]
-  courseLikes        CourseLike[]
+  userModuleProgress  userModuleProgress[]
+  MiniModuleProgress  MiniModuleProgress[]
+  userLessonProgress  UserLessonProgress[]
+  courseLikes         CourseLike[]
+  CompletedChallenges CompletedChallenges[]
+
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 
   @@map("users")
-  CompletedChallenges CompletedChallenges[]
 }
-
 
 model UserProfileImage {
   id   Int    @id @default(autoincrement())
@@ -83,12 +85,12 @@ model Course {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  modules  CourseModule[]
-  progress UserCourseProgress[]
-  ratings  CourseRating[]
-  videos   Video[]
-  users    User[]
-  likedBy  CourseLike[]
+  modules             CourseModule[]
+  progress            UserCourseProgress[]
+  ratings             CourseRating[]
+  videos              Video[]
+  users               User[]
+  likedBy             CourseLike[]
   completedChallenges CompletedChallenges[]
 }
 
@@ -255,6 +257,18 @@ model Challenge {
   completions CompletedChallenges[]
 }
 
+model Message {
+  id         Int      @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  content    String
+  type       String   @default("text") // "text", "image", etc.
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
+
 model ChallengeLike {
   id          Int       @id @default(autoincrement())
   user        User      @relation(fields: [userId], references: [id])
@@ -266,10 +280,10 @@ model ChallengeLike {
 }
 
 model ChallengeInstructions {
-  id          Int    @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   number      Int
   instruction String
-  completed   Boolean  @default(false)
+  completed   Boolean @default(false)
 
   challengeId Int
   challenge   Challenge @relation(fields: [challengeId], references: [id])
@@ -285,12 +299,12 @@ model ChallengeSolutions {
 }
 
 model CompletedChallenges {
-  id    Int @id @default(autoincrement())
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-  challengeId Int 
-  challenge Challenge @relation(fields: [challengeId], references: [id])
-  createdAt DateTime @default(now())
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  createdAt   DateTime  @default(now())
 
   Course Course[]
 }
