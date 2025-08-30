@@ -27,7 +27,6 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
   ) {
     client.join(roomId);
-    console.log(`Socket ${client.id} joined room ${roomId}`);
   }
 
   @SubscribeMessage('sendDM')

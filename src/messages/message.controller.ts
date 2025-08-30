@@ -8,7 +8,6 @@ export class ChatController {
 
   @Post()
   async sendMessage(@Body() dto: CreateMessageDto) {
-    console.log("Received message DTO:", dto);
     return this.chatService.sendMessage(dto);
   }
 

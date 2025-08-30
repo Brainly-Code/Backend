@@ -10,17 +10,18 @@ import { CreateChallengeCompleter, CreateChallengeInstructionDto, CreateChalleng
 export class ChallengesService {
   private readonly logger = new Logger(ChallengesService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
-  async createChallenge( dto : CreateChallengeDto ) {
+  async createChallenge(dto: CreateChallengeDto) {
     try {
-      const challenge = await this.prisma.challenge.create({data: dto})
-    
-      return {"message": "Challenge created successfully",
+      const challenge = await this.prisma.challenge.create({ data: dto })
+
+      return {
+        "message": "Challenge created successfully",
         challenge: challenge
       };
     } catch (error) {
-      this.logger.error('Request failed:',error);
+      this.logger.error('Request failed:', error);
       throw new NotFoundException("Challenge not found");
     }
   }
@@ -28,7 +29,7 @@ export class ChallengesService {
   async updateChallenge(id: string, dto: any) {
     const challengeId = Number(id);
 
-    if(isNaN(challengeId)){
+    if (isNaN(challengeId)) {
       return "Challenge id is not a number";
     }
 
@@ -40,7 +41,7 @@ export class ChallengesService {
 
       return updatedChallenge;
     } catch (error) {
-      this.logger.error('Request failed:',error);
+      this.logger.error('Request failed:', error);
       return "Failed to update challenge";
     }
   }
@@ -48,16 +49,16 @@ export class ChallengesService {
   async incrementLikes(challengeId: string) {
     const cId = Number(challengeId);
 
-    if(isNaN(cId)){
+    if (isNaN(cId)) {
       throw new BadRequestException("Invalid challenge Id, must be a number");
     }
 
     const challenge = await this.prisma.challenge.findUnique({
       where: { id: cId },
     });
-  
+
     try {
-    
+
       if (!challenge) {
         throw new NotFoundException("Challenge not found");
       }
@@ -72,9 +73,9 @@ export class ChallengesService {
         },
       });
 
-      return {"message": "Challenge liked"};
+      return { "message": "Challenge liked" };
     } catch (error) {
-      this.logger.error('Request failed:',error);
+      this.logger.error('Request failed:', error);
       throw new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -85,16 +86,16 @@ export class ChallengesService {
 
       return challenges;
     } catch (error) {
-      this.logger.error('Request failed:',error)
+      this.logger.error('Request failed:', error)
       throw new NotFoundException("Unable to get Challenges");
     }
   }
 
-  async getChallengeById(challengeId: string){
+  async getChallengeById(challengeId: string) {
     const cId = Number(challengeId)
 
-    if(isNaN(cId)){
-      throw new Error ("Invalid challenge Id is not a number");
+    if (isNaN(cId)) {
+      throw new Error("Invalid challenge Id is not a number");
     }
 
     try {
@@ -103,46 +104,46 @@ export class ChallengesService {
           id: cId
         }
       })
-  
+
       if (!challenge) {
         throw new NotFoundException('Challenge not found');
       }
-  
+
       return challenge;
     } catch (error) {
-      this.logger.error('Request failed:',error)
+      this.logger.error('Request failed:', error)
       throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    
+
   }
 
-  async createChallengeInstruction(dto: CreateChallengeInstructionDto ) {
-    if(!dto.challengeId) {
+  async createChallengeInstruction(dto: CreateChallengeInstructionDto) {
+    if (!dto.challengeId) {
       throw new NotFoundException("Challenge not found!");
     }
     try {
       const challengeInstruction = await this.prisma.challengeInstructions.create({
         data: dto
       })
-      return {"Message" : "Solution creation was successfull"};
+      return { "Message": "Solution creation was successfull" };
     } catch (error) {
-      this.logger.error('Request failed:',error)
+      this.logger.error('Request failed:', error)
       throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async getChallengeInstructions(challengeId: number) {
     return await this.prisma.challengeInstructions.findMany({
-     where: {
-       challengeId: challengeId
-     }
+      where: {
+        challengeId: challengeId
+      }
     })
-  }  
+  }
 
   async updateChallengeInstruction(id: string, dto: any) {
     const instructionId = Number(id);
 
-    if(isNaN(instructionId)){
+    if (isNaN(instructionId)) {
       return "Instruction id is not a number";
     }
 
@@ -154,7 +155,7 @@ export class ChallengesService {
 
       return updatedInstruction;
     } catch (error) {
-      this.logger.error('Request failed:',error);
+      this.logger.error('Request failed:', error);
       return "Failed to update instruction";
     }
   }
@@ -162,7 +163,7 @@ export class ChallengesService {
   async deleteChallengeInstruction(id: string) {
     const instructionId = Number(id);
 
-    if(isNaN(instructionId)){
+    if (isNaN(instructionId)) {
       return "Instruction id is not a number";
     }
 
@@ -173,13 +174,13 @@ export class ChallengesService {
 
       return { message: "Instruction deleted successfully" };
     } catch (error) {
-      this.logger.error('Request failed:',error);
+      this.logger.error('Request failed:', error);
       return "Failed to delete instruction";
     }
   }
 
   async createChallengeSolution(dto: CreateChallengeSolutionDto) {
-    if(!dto.challengeId) {
+    if (!dto.challengeId) {
       throw new NotFoundException("Challenge not found!");
     }
     try {
@@ -187,58 +188,44 @@ export class ChallengesService {
         data: dto
       })
 
-      return {"Message" : "Solution creation was successfull"};
+      return { "Message": "Solution creation was successfull" };
     } catch (error) {
-      this.logger.error('Request failed:',error)
+      this.logger.error('Request failed:', error)
       throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async getChallengeSolution(challengeId: number) {
-     return await this.prisma.challengeSolutions.findMany({
+    return await this.prisma.challengeSolutions.findMany({
       where: {
         challengeId: challengeId
       }
-     })
+    })
   }
 
   async createChallengeCompleter(dto: CreateChallengeCompleter) {
-    const user = await this.prisma.user.findUnique({
+    if (!dto.userId || !dto.challengeId) {
+      throw new BadRequestException("User ID and Challenge ID are required.");
+    }
+    const existing = await this.prisma.completedChallenges.findFirst({
       where: {
-        id: dto.userId,
+        userId: dto.userId,
+        challengeId: dto.challengeId,
       }
-    })
-
-    const challenge = await this.prisma.challenge.findUnique({
-      where: {
-        id: dto.challengeId,
+    });
+    if (existing) {
+      throw new BadRequestException("Challenge already completed by this user.");
+    }
+    return this.prisma.completedChallenges.create({
+      data: {
+        userId: dto.userId,
+        challengeId: dto.challengeId,
+        createdAt: new Date(),
       }
-    })
-
-    if(!user) {
-      throw new NotFoundException("User not found!");
-    }
-
-    if(!challenge) {
-      throw new NotFoundException("Challenge not found!");
-    }
-    try {
-      const challengeCompleter = await this.prisma.completedChallenges.create({
-        data: dto
-      });
-
-      return {
-        message: "Completer created"
-      }
-    } catch (error) {
-      this.logger.error(error)
-      throw new HttpException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-
+    });
   }
 
-  async completeStep (instructionId: number) {
+  async completeStep(instructionId: number) {
 
     const instruction = await this.prisma.challengeInstructions.findUnique({
       where: {
@@ -246,7 +233,7 @@ export class ChallengesService {
       }
     })
 
-    if(instruction?.completed === false) {
+    if (instruction?.completed === false) {
       const challengeInstructionCompletion = await this.prisma.challengeInstructions.update({
         where: {
           id: instructionId
@@ -258,7 +245,7 @@ export class ChallengesService {
 
       return challengeInstructionCompletion
 
-    }else {
+    } else {
       const challengeInstructionUnCompletion = await this.prisma.challengeInstructions.update({
         where: {
           id: instructionId
@@ -273,5 +260,5 @@ export class ChallengesService {
     }
   }
 
-  
+
 }
