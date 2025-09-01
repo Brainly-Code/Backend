@@ -10,6 +10,11 @@ export class ChatController {
   async sendMessage(@Body() dto: CreateMessageDto) {
     return this.chatService.sendMessage(dto);
   }
+  
+  @Get('unread-count/:userId')
+  async getUnreadCount(@Param('userId') userId: number) {
+    return this.chatService.getUnreadCount(userId);
+  }
 
   @Get(':userId/:otherUserId')
   async getMessages(
@@ -19,8 +24,20 @@ export class ChatController {
     return this.chatService.getMessagesBetween(+userId, +otherUserId);
   }
 
-  @Get('unread-count/:userId')
-  async getUnreadCount(@Param('userId') userId: number) {
-    return this.chatService.getUnreadCount(userId);
+  @Get('unread/:userId/:otherUserId')
+  getUnreadPerSender(
+    @Param('userId') userId: string,
+    @Param('otherUserId') otherUserId: string,
+  ) {
+    return this.chatService.getUnreadMessagesPerSender(+userId, +otherUserId);
   }
+
+  @Get('read/:userId/:otherUserId')
+  readMessages(
+    @Param('userId') userId: string,
+    @Param('otherUserId') otherUserId: string,
+  ) {
+    return this.chatService.readMessages(+userId, +otherUserId);
+  }
+
 }
