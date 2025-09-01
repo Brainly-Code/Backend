@@ -41,7 +41,7 @@ async editUser(userId: number, dto: EditUserDto) {
   const previousUser = await this.prisma.user.findUnique({
     where: { id: userId },
   });
-
+    console.log("HIT")
   if (!previousUser) {
     throw new NotFoundException(`User with ID ${userId} not found`);
   }

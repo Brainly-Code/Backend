@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Param, Patch, UseGuards, UseInterceptors, Req, ParseIntPipe } from "@nestjs/common"; // Add Body, ParseIntPipe, ValidationPipe
+import { Controller, Body,Get, Param, Patch, UseGuards, UseInterceptors, Req, ParseIntPipe } from "@nestjs/common"; // Add Body, ParseIntPipe, ValidationPipe
 import { User } from "generated/prisma";
 import { GetUser } from "src/decorator";
 import { UserService } from "./user.service";
@@ -18,19 +18,24 @@ export class UserController {
     return this.userService.getMe(user);
   }
   
+
   @Patch("edit/:id")
   @UseInterceptors(FileInterceptor("image"))
   async editUser(
-    @Param("id", ParseIntPipe) id: number, 
-    @Req() req: Request,
-   
+    @Param("id", ParseIntPipe) id: number,
+    @Body() body: any,  // ✅ use @Body to capture text fields
   ) {
-   
-    const { username, email, isPremium } = req.body;
-   
-    const isPremiumBoolean = typeof isPremium === 'string' ? (isPremium === 'true') : isPremium;
+    const { username, email, isPremium, password } = body;
+    console.log("Received body:", body); // Debugging line
+    const isPremiumBoolean =
+      typeof isPremium === "string" ? isPremium === "true" : isPremium;
 
-    return this.userService.editUser(id, { username, email, isPremium: isPremiumBoolean });
+    return this.userService.editUser(id, {
+      username,
+      email,
+      password, // ✅ now actually forwarded
+      isPremium: isPremiumBoolean,
+    });
   }
 
   @Get(":id")

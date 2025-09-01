@@ -41,7 +41,7 @@ export class CoursesController {
     return this.coursesService.getCoursesByCreator(userId);
   }
 
-  @UseGuards(JwtGuard)
+@UseGuards(JwtGuard)
 @Get('/liked-courses')
 async getUserLikedCourses(
   @Headers() reqHeaders: any,
