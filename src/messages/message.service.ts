@@ -4,7 +4,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 
 @Injectable()
 export class ChatService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async sendMessage(dto: CreateMessageDto) {
     return this.prisma.message.create({
@@ -26,6 +26,18 @@ export class ChatService {
         ],
       },
       orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async getUnreadCount(userId: number) {
+    // Group by sender, count unread messages for this recipient
+    return this.prisma.message.groupBy({
+      by: ['senderId'],
+      where: {
+        receiverId: userId,
+        isRead: false,
+      },
+      _count: { id: true }
     });
   }
 }

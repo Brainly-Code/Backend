@@ -264,6 +264,7 @@ model Message {
   content    String
   type       String   @default("text") // "text", "image", etc.
   createdAt  DateTime @default(now())
+  isRead     Boolean  @default(false)
 
   sender   User @relation("SentMessages", fields: [senderId], references: [id])
   receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])

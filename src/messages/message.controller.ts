@@ -4,7 +4,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 
 @Controller('chat')
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly chatService: ChatService) { }
 
   @Post()
   async sendMessage(@Body() dto: CreateMessageDto) {
@@ -17,5 +17,10 @@ export class ChatController {
     @Param('otherUserId') otherUserId: string,
   ) {
     return this.chatService.getMessagesBetween(+userId, +otherUserId);
+  }
+
+  @Get('unread-count/:userId')
+  async getUnreadCount(@Param('userId') userId: number) {
+    return this.chatService.getUnreadCount(userId);
   }
 }
