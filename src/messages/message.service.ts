@@ -18,6 +18,9 @@ export class ChatService {
   }
 
   async getMessagesBetween(userId: number, otherUserId: number) {
+    if (!Number.isInteger(userId) || !Number.isInteger(otherUserId)) {
+      throw new Error("Invalid userId or otherUserId");
+    }
     return this.prisma.message.findMany({
       where: {
         OR: [
@@ -38,6 +41,27 @@ export class ChatService {
         read: false,
       },
       _count: { id: true }
+    });
+  }
+
+  async getUnreadMessagesPerSender(userId: number, otherUserId: number) {
+    return this.prisma.message.findMany({
+      where: {
+        senderId: otherUserId,
+        receiverId: userId,
+        read: false,
+      },
+    });
+  }
+
+  async readMessages(userId: number, otherUserId: number) {
+    return this.prisma.message.updateMany({
+      where: {
+        senderId: otherUserId,
+        receiverId: userId,
+        read: false,
+      },
+      data: { read: true },
     });
   }
 }
