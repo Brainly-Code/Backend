@@ -35,7 +35,7 @@ export class ChatService {
       by: ['senderId'],
       where: {
         receiverId: userId,
-        isRead: false,
+        read: false,
       },
       _count: { id: true }
     });
