@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { BadRequestException, Body, Controller, Get, Param, Post, Put, Delete } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch,Post, Put, Delete } from '@nestjs/common';
 import { ChallengesService } from './challenges.service';
 import { CreateChallengeDto } from './dto/createChallenge.dto';
 import { CreateChallengeCompleter, CreateChallengeInstructionDto, CreateChallengeSolutionDto } from './dto';
@@ -13,9 +13,12 @@ export class ChallengesController {
     return this.challengeService.createChallenge(dto);
   }
   
-  @Post('like/:id')
-  incrementLikes(@Param('id') id: string) {
-    return this.challengeService.incrementLikes(id);
+  @Patch(':id/like')
+  toggleLike(
+    @Param('id') id: string,
+    @Body('userId') userId: number,
+  ) {
+    return this.challengeService.toggleLike(id, userId);
   }
 
   @Get('')

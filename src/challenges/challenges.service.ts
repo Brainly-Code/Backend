@@ -46,43 +46,68 @@ export class ChallengesService {
     }
   }
 
-  async incrementLikes(challengeId: string) {
-    const cId = Number(challengeId);
+  async toggleLike(challengeId: string, userId: number) {
+  const cId = Number(challengeId);
 
-    if (isNaN(cId)) {
-      throw new BadRequestException("Invalid challenge Id, must be a number");
-    }
+  if (isNaN(cId)) {
+    throw new BadRequestException("Invalid challenge Id, must be a number");
+  }
 
-    const challenge = await this.prisma.challenge.findUnique({
-      where: { id: cId },
+  const challenge = await this.prisma.challenge.findUnique({
+    where: { id: cId },
+  });
+
+  if (!challenge) {
+    throw new NotFoundException("Challenge not found");
+  }
+
+  // Check if user already liked
+  const existingLike = await this.prisma.challengeLike.findUnique({
+    where: {
+      userId_challengeId: {
+        userId,
+        challengeId: cId,
+      },
+    },
+  });
+
+  if (existingLike) {
+    // 👎 User already liked → remove like
+    await this.prisma.challengeLike.delete({
+      where: { id: existingLike.id },
     });
 
-    try {
+    await this.prisma.challenge.update({
+      where: { id: cId },
+      data: { likes: { decrement: 1 } },
+    });
 
-      if (!challenge) {
-        throw new NotFoundException("Challenge not found");
-      }
+    return { liked: false, message: "Challenge disliked" };
+  } else {
+    // 👍 User not liked yet → add like
+    await this.prisma.challengeLike.create({
+      data: {
+        userId,
+        challengeId: cId,
+      },
+    });
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const likedChallenge = await this.prisma.challenge.update({
-        where: { id: cId },
-        data: {
-          likes: {
-            increment: 1,
-          },
-        },
-      });
+    await this.prisma.challenge.update({
+      where: { id: cId },
+      data: { likes: { increment: 1 } },
+    });
 
-      return { "message": "Challenge liked" };
-    } catch (error) {
-      this.logger.error('Request failed:', error);
-      throw new HttpException("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return { liked: true, message: "Challenge liked" };
   }
+}
 
   async getChallenges() {
     try {
-      const challenges = await this.prisma.challenge.findMany();
+      const challenges = await this.prisma.challenge.findMany({
+        include: {
+          likesList:true,
+        }
+      });
 
       return challenges;
     } catch (error) {
