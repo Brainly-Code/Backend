@@ -7,6 +7,7 @@ import { resolve } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
 
 async function bootstrap() {
+  console.log('Starting NestJS application...');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.useGlobalPipes(
@@ -44,6 +45,6 @@ async function bootstrap() {
   const server = app.getHttpServer();
   server.setTimeout(20 * 60 * 1000); // 10 mins
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT || 3000);
 }
 void bootstrap();
