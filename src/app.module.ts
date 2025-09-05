@@ -25,6 +25,7 @@ import { AuthModule } from "./auth/auth.module";
 //socket import
 import { ChatGateway } from "./chat.gateway";
 import { ChatModule } from "./messages/message.module";
+import { CommentModule } from "./comments/comment.module";
 
 @Module({
   imports: [
@@ -51,7 +52,8 @@ import { ChatModule } from "./messages/message.module";
     ChallengeInstructionsModule,
     AdminModule,
     AuthoModule,
-    ChatModule
+    ChatModule,
+    CommentModule
   ],
   providers: [ChatGateway],
 })
