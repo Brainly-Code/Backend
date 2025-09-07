@@ -31,6 +31,31 @@ export class AdminService {
     return {courseNumber, studentCount, challengeCount, premiumCount};
   }
 
+  async getGraphStats() {
+    const data = await this.prisma.user.groupBy({
+      by: ['createdAt'],
+      _count: { id: true },
+    });
+
+    // Transform into month-based aggregation
+    const stats = Array.from({ length: 12 }, (_, i) => {
+      const date = new Date();
+      date.setMonth(date.getMonth() - (11 - i));
+      const month = date.toLocaleString("default", { month: "short" });
+
+      const users = data.filter(d => 
+        d.createdAt.getMonth() === date.getMonth() &&
+        d.createdAt.getFullYear() === date.getFullYear()
+      ).reduce((sum, d) => sum + d._count.id, 0);
+
+      return { month, users };
+    });
+
+    return stats;
+  }
+
+
+
   async getUsers() {
     const users = await this.prisma.user.findMany();
     return users;

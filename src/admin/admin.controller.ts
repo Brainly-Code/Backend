@@ -41,4 +41,9 @@ export class AdminController {
   GetLessonCompleters(@Param('challengeId') challengeId: number) {
     return this.adminServices.getLessonCompleters(challengeId);
   }
+
+  @Get('/graph-stats')
+  getGraphStats() {
+    return this.adminServices.getGraphStats();
+  }
 }
