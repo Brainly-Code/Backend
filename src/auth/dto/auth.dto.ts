@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsString, IsEnum, IsOptional } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, IsEnum, IsOptional, IsStrongPassword } from "class-validator";
 import { Role } from "@prisma/client";
 
 export class AuthDto {
@@ -18,6 +18,10 @@ export class AuthDto {
     name: "izere12",
     required: true
   })
+  @IsStrongPassword(
+      { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 },
+  { message: "Password must be at least 8 chars, include upper/lowercase, number, and symbol" }
+  )
   @IsString()
   @IsNotEmpty()
   password!: string;
