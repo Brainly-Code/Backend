@@ -19,8 +19,8 @@ export class AuthDto {
     required: true
   })
   @IsStrongPassword(
-      { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 },
-  { message: "Password must be at least 8 chars, include upper/lowercase, number, and symbol" }
+      { minLength: 6, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 },
+  { message: "Password must be at least 6 chars, include upper/lowercase, number, and symbol" }
   )
   @IsString()
   @IsNotEmpty()
