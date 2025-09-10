@@ -13,11 +13,15 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
+  // ----------------------------
+  // Google OAuth
+  // ----------------------------
+
   // Start Google OAuth login flow
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
-    // Redirects automatically to Google's OAuth consent screen
+    // Passport handles redirect automatically
   }
 
   // Handle Google OAuth redirect
@@ -36,22 +40,28 @@ export class AuthController {
 
       const { access_token } = await this.authService.validateOAuthLogin(oauthUser);
 
-      const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
-      console.log("frontendUrl", access_token);
+      const frontendUrl =
+        this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
       return res.redirect(`${frontendUrl}/user?token=${access_token}`);
-      
     } catch (err: any) {
       console.error('Error in googleAuthRedirect:', err);
-      const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
-      return res.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(err.message)}`);
+      const frontendUrl =
+        this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
+      return res.redirect(
+        `${frontendUrl}/auth/error?message=${encodeURIComponent(err.message)}`,
+      );
     }
   }
+
+  // ----------------------------
+  // GitHub OAuth
+  // ----------------------------
 
   // Start GitHub OAuth login flow
   @Get('github')
   @UseGuards(AuthGuard('github'))
   async githubAuth() {
-    // Redirects automatically to GitHub's OAuth consent screen
+    // Passport handles redirect automatically
   }
 
   // Handle GitHub OAuth redirect
@@ -62,20 +72,15 @@ export class AuthController {
       if (!req.user) throw new Error('No user data received from GitHub OAuth');
 
       const user = req.user as any;
-      
-      // Handle GitHub's email privacy settings
       let email = user.email;
-      
-      // If primary email is not available, try to get it from emails array
+
+      // Handle GitHub email privacy
       if (!email && user.emails && user.emails.length > 0) {
-        // Look for primary email first
         const primaryEmail = user.emails.find((e: any) => e.primary);
         email = primaryEmail ? primaryEmail.value : user.emails[0].value;
       }
-      
-      // If still no email, use GitHub username as fallback
       if (!email) {
-        email = `${user.username}@github.local`; // or handle this case differently
+        email = `${user.username}@github.local`;
         console.warn(`GitHub user ${user.username} has no public email, using fallback`);
       }
 
@@ -84,18 +89,22 @@ export class AuthController {
         name: user.name || user.displayName || user.username,
         photo: user.photo || user.avatar_url || user._json?.avatar_url,
         provider: 'github' as const,
-        githubId: user.id, // Add GitHub ID for reference
-        username: user.username, // Add username for reference
+        githubId: user.id,
+        username: user.username,
       };
 
       const { access_token } = await this.authService.validateOAuthLogin(oauthUser);
 
-      const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
+      const frontendUrl =
+        this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
       return res.redirect(`${frontendUrl}/user?token=${access_token}`);
     } catch (err: any) {
       console.error('Error in githubAuthRedirect:', err);
-      const frontendUrl = this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
-      return res.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(err.message)}`);
+      const frontendUrl =
+        this.configService.get('FRONTEND_URL') || 'https://frontend-mdy5.onrender.com';
+      return res.redirect(
+        `${frontendUrl}/auth/error?message=${encodeURIComponent(err.message)}`,
+      );
     }
   }
 }
