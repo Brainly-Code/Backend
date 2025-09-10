@@ -31,9 +31,9 @@ model User {
   updatedAt DateTime @updatedAt
 
   email     String  @unique
-  hash      String // Made optional for OAuth users
+  hash      String  // Made optional for OAuth users
   username  String? // Optional if not enforced by OAuth
-  role      Role
+  role      Role?   @default(USER)
   isPremium Boolean @default(false)
 
   provider String  @default("local") // 'google' | 'github' | 'local'

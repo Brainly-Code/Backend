@@ -36,7 +36,7 @@ export class AuthService {
           username: dto.username,
           email: dto.email,
           hash,
-          role: dto.role,
+          role: dto.role || 'USER',
           isPremium: false, // <-- Explicitly set isPremium to false on signup
         },
       });
@@ -58,7 +58,7 @@ export class AuthService {
         throw new ForbiddenException("Could not retrieve user details after signup.");
       }
 
-      return this.signToken(createdUserWithPremium.id, createdUserWithPremium.email, createdUserWithPremium.role, createdUserWithPremium.isPremium);
+      return this.signToken(createdUserWithPremium.id, createdUserWithPremium.email, createdUserWithPremium.role ?? 'USER', createdUserWithPremium.isPremium);
     } catch (error) {
       if (
         error instanceof
@@ -116,7 +116,7 @@ export class AuthService {
     }
 
     // Return the token, now including isPremium
-    return this.signToken(user.id, user.email, user.role, user.isPremium);
+    return this.signToken(user.id, user.email, user.role ?? 'USER', user.isPremium);
   }
 
   async signToken(
@@ -130,7 +130,7 @@ export class AuthService {
     const payload = {
       sub: userId,
       email,
-      role: role,
+      role: role || 'USER',
       isPremium: isPremium, // <-- Include isPremium in the JWT payload
     };
 

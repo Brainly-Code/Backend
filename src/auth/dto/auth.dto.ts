@@ -43,5 +43,5 @@ export class AuthDto {
   })
   @IsOptional()
   @IsEnum(Role)
-  role!: Role;
+  role?: Role;
 }
