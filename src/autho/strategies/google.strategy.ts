@@ -18,7 +18,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     super({
       clientID,
       clientSecret,
-      callbackURL: 'https://backend-hx6c.onrender.com/autho/google/redirect',
+      callbackURL: 'https://backend-hx6c.onrender.com/autho/redirect/callback',
       scope: ['email', 'profile'],
     });
   }
