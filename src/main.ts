@@ -5,6 +5,7 @@ import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { resolve } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import * as cookieParser from "cookie-parser";
 
 async function bootstrap() {
   console.log('Starting NestJS application...');
@@ -17,6 +18,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  
+  app.use(cookieParser());
 
   app.useStaticAssets(resolve(__dirname, '.', 'uploads'), {
     prefix: '/uploads/',

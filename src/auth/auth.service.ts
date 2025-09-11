@@ -2,6 +2,7 @@
 import {
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AuthDto } from "./dto";
@@ -9,7 +10,6 @@ import * as argon from "argon2";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { ApiBadRequestResponse, ApiResponse } from "@nestjs/swagger";
 import { LoginDto } from "./dto/login.dto";
 
 @Injectable()
@@ -20,136 +20,127 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  @ApiResponse({
-    description: 'User created successfully as required'
-  })
-  @ApiBadRequestResponse({
-    description: 'User could not register. Try again'
-  })
-  async signup(dto: AuthDto) {
+  // --- SIGNUP ---
+  async signup(dto: AuthDto): Promise<{ access_token: string; refresh_token: string }> {
     try {
-      //Create hashed password with argon
       const hash = await argon.hash(dto.password);
-      //Save the new user in db
       const user = await this.prisma.user.create({
         data: {
           username: dto.username,
           email: dto.email,
           hash,
           role: dto.role || 'USER',
-          isPremium: false, // <-- Explicitly set isPremium to false on signup
+          isPremium: false,
         },
       });
 
-      // Returning the user token, now including isPremium
-      // We need to fetch the user again to ensure we get all fields including isPremium
-      const createdUserWithPremium = await this.prisma.user.findUnique({
-          where: { id: user.id },
-          select: {
-              id: true,
-              email: true,
-              role: true,
-              isPremium: true, // Select isPremium
-              // Add other fields you want to return with the token payload if necessary
-          }
+      const createdUser = await this.prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          isPremium: true,
+        },
       });
 
-      if (!createdUserWithPremium) {
+      if (!createdUser) {
         throw new ForbiddenException("Could not retrieve user details after signup.");
       }
 
-      return this.signToken(createdUserWithPremium.id, createdUserWithPremium.email, createdUserWithPremium.role ?? 'USER', createdUserWithPremium.isPremium);
+      return this.generateTokens(
+        createdUser.id,
+        createdUser.email,
+        createdUser.role ?? 'USER',
+        createdUser.isPremium,
+      );
     } catch (error) {
-      if (
-        error instanceof
-        PrismaClientKnownRequestError
-      ) {
-        if (error.code === "P2002") {
-          throw new ForbiddenException(
-            "User already exists",
-          );
-        }
+      if (error instanceof PrismaClientKnownRequestError && error.code === "P2002") {
+        throw new ForbiddenException("User already exists");
       }
       throw error;
     }
   }
 
-  async login(dto: LoginDto) {
-    //Find the user by email
-    const user =
-      await this.prisma.user.findUnique({
-        where: {
-          email: dto.email,
+  // --- LOGIN ---
+  async login(dto: LoginDto): Promise<{ access_token: string; refresh_token: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      select: {
+        id: true,
+        email: true,
+        hash: true,
+        role: true,
+        isPremium: true,
+      },
+    });
+
+    if (!user) throw new ForbiddenException("User not found");
+    if (!user.hash) {
+      throw new ForbiddenException("This account was created with OAuth. Please use OAuth to sign in.");
+    }
+
+    const pwMatches = await argon.verify(user.hash, dto.password);
+    if (!pwMatches) throw new ForbiddenException("Incorrect password");
+
+    return this.generateTokens(user.id, user.email, user.role ?? 'USER', user.isPremium);
+  }
+
+  // --- REFRESH ---
+  // Accepts the refresh token string (from cookie), verifies it, and returns new tokens.
+  async refresh(refreshToken: string | undefined): Promise<{ access_token: string; refresh_token: string }> {
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token missing');
+    }
+
+    try {
+      const secret = this.config.get<string>('JWT_REFRESH_SECRET');
+      const payload = await this.jwt.verifyAsync(refreshToken, { secret }) as any;
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          isPremium: true,
         },
-        select: { // Select all necessary fields, including isPremium
-            id: true,
-            email: true,
-            hash: true,
-            role: true,
-            isPremium: true, // <-- Select isPremium here
-        }
       });
 
-    if (!user) {
-      throw new ForbiddenException(
-        "User not found",
-      );
-    }
+      if (!user) throw new UnauthorizedException('Invalid refresh token - user not found');
 
-    // Check if user has a password hash (OAuth users might not have one)
-    if (!user.hash) {
-      throw new ForbiddenException(
-        "This account was created with OAuth. Please use OAuth to sign in.",
-      );
+      // Issue new tokens (rotates refresh token)
+      return this.generateTokens(user.id, user.email, user.role ?? 'USER', user.isPremium);
+    } catch (err) {
+      // Could be token expired or invalid
+      throw new UnauthorizedException('Invalid or expired refresh token');
     }
-
-    //Compare passwords
-    const pwMatches = await argon.verify(
-      user.hash,
-      dto.password,
-    );
-    //Throw error if not matching
-    if (!pwMatches) {
-      throw new ForbiddenException(
-        "Incorrect password",
-      );
-    }
-
-    // Return the token, now including isPremium
-    return this.signToken(user.id, user.email, user.role ?? 'USER', user.isPremium);
   }
 
-  async signToken(
-    userId: number,
-    email: string,
-    role: string,
-    isPremium: boolean, // <-- Add isPremium as a parameter
-  ): Promise<{
-    access_token: string;
-  }> {
-    const payload = {
-      sub: userId,
-      email,
-      role: role || 'USER',
-      isPremium: isPremium, // <-- Include isPremium in the JWT payload
-    };
+  // --- Generate tokens helper ---
+  private async generateTokens(userId: number, email: string, role: string, isPremium: boolean) {
+    const accessPayload = { sub: userId, email, role, isPremium };
+    const refreshPayload = { sub: userId };
 
-    const secret = this.config.get("JWT_SECRET");
+    const accessToken = await this.jwt.signAsync(accessPayload, {
+      expiresIn: '15m',
+      secret: this.config.get<string>('JWT_SECRET'),
+    });
 
-    const token = await this.jwt.signAsync(
-      payload,
-      {
-        expiresIn: "1day",
-        secret: secret,
-      },
-    );
+    const refreshToken = await this.jwt.signAsync(refreshPayload, {
+      expiresIn: '7d',
+      secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+    });
 
     return {
-      access_token: token,
+      access_token: accessToken,
+      refresh_token: refreshToken,
     };
   }
 
+  // --- LOGOUT ---
+  // Note: if you store refresh tokens in DB for revocation you should delete/invalidate here.
   logout() {
-    return {message: "Logged out successfully"};
-  };
+    return { message: 'Logged out successfully' };
+  }
 }
