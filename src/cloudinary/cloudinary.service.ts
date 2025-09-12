@@ -48,6 +48,31 @@ export class CloudinaryService {
     });
   }
 
+   async uploadDocument(file: Express.Multer.File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const extension = file.originalname.split('.').pop(); // get original extension
+      cloudinary.uploader.upload_stream(
+        {
+          folder: 'course-documents',
+          resource_type: 'raw', // important for pdf, ppt, pptx, etc.
+          public_id: `${file.originalname.split('.')[0]}`, // optional: use original filename
+        },
+        (error, result: any) => {
+          if (error) return reject(error);
+          if (!result || !result.secure_url) {
+            return reject(new Error('Upload failed or no URL returned'));
+          }
+          // append extension to URL if needed
+          const urlWithExtension = result.secure_url.includes(`.${extension}`)
+            ? result.secure_url
+            : `${result.secure_url}.${extension}`;
+          resolve(urlWithExtension);
+        },
+      ).end(file.buffer);
+    });
+  }
+
+
   async deleteImage(publicId: string): Promise<void> {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.destroy(
