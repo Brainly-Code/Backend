@@ -35,14 +35,15 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res() res: Response) {
     const { access_token, refresh_token } = await this.authService.login(dto);
 
-    res.cookie("refresh_token", refresh_token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+     res.cookie('refreshToken', refresh_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/auth/refresh', // only sent on refresh endpoint
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
 
-    return res.json({ access_token });
+    return res.json({ access_token});
   }
 
   @Post("refresh")

@@ -25,6 +25,7 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
+
   app.enableCors({
     origin: [
       "https://frontend-mdy5.onrender.com",
