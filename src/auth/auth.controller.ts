@@ -24,7 +24,7 @@ export class AuthController {
     res.cookie("refresh_token", refresh_token, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -33,23 +33,23 @@ export class AuthController {
 
   @Post("login")
   async login(@Body() dto: LoginDto, @Res() res: Response) {
-    const { access_token, refresh_token } = await this.authService.login(dto);
+    const { access_token, refresh_token, user } = await this.authService.login(dto);
 
-     res.cookie('refresh_token', refresh_token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
+    res.cookie('refresh_token', refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
-    return res.json({ access_token});
+    return res.json({ access_token, user});
   }
 
   @Post("refresh")
   async refresh(@Req() req: Request, @Res() res: Response) {
     const refresh_token = req.cookies["refresh_token"];
-    const { access_token } = await this.authService.refresh(refresh_token);
-    return res.json({ access_token });
+    const { access_token, user } = await this.authService.refresh(refresh_token);
+    return res.json({ access_token, user });
   }
 
   @Post("logout")

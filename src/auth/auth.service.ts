@@ -63,7 +63,7 @@ export class AuthService {
   }
 
   // --- LOGIN ---
-  async login(dto: LoginDto): Promise<{ access_token: string; refresh_token: string }> {
+  async login(dto: LoginDto): Promise<{ access_token: string; refresh_token: string; user: { id: number; email: string; role: string | null; isPremium: boolean } }> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
       select: {
@@ -83,12 +83,13 @@ export class AuthService {
     const pwMatches = await argon.verify(user.hash, dto.password);
     if (!pwMatches) throw new ForbiddenException("Incorrect password");
 
-    return this.generateTokens(user.id, user.email, user.role ?? 'USER', user.isPremium);
+    const { access_token, refresh_token } = await this.generateTokens(user.id, user.email, user.role ?? 'USER', user.isPremium);
+    return { access_token: access_token, refresh_token: refresh_token, user: { id: user.id, email: user.email, role: user.role ?? "USER", isPremium: user.isPremium } }
   }
 
   // --- REFRESH ---
   // Accepts the refresh token string (from cookie), verifies it, and returns new tokens.
-  async refresh(refreshToken: string | undefined): Promise<{ access_token: string; refresh_token: string }> {
+  async refresh(refreshToken: string | undefined): Promise<{ access_token: string; refresh_token: string; user: { id: number; email: string; role: string | null; isPremium: boolean } }> {
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token missing');
     }
@@ -109,8 +110,9 @@ export class AuthService {
 
       if (!user) throw new UnauthorizedException('Invalid refresh token - user not found');
 
-      // Issue new tokens (rotates refresh token)
-      return this.generateTokens(user.id, user.email, user.role ?? 'USER', user.isPremium);
+      // Issue new tokens (rotates refresh token);
+        const { access_token, refresh_token } = await this.generateTokens(user.id, user.email, user.role ?? 'USER', user.isPremium);
+        return { access_token: access_token, refresh_token: refresh_token, user: { id: user.id, email: user.email, role: user.role ?? "USER", isPremium: user.isPremium } }
     } catch (err) {
       // Could be token expired or invalid
       throw new UnauthorizedException('Invalid or expired refresh token');
