@@ -62,22 +62,26 @@ export class AdminService {
   }
 
   async deleteUser(id: string) {
+  const userId = Number(id);
 
-    const userId = Number(id);
+  try {
+    // Delete related messages first
+    await this.prisma.message.deleteMany({
+      where: { receiverId: userId }
+    });
 
-    try {
-      await this.prisma.user.delete({
-        where: {
-          id: userId,
-        }
-      })
-  
-      return {message: "User Deleted successfully"};
-    } catch (error) {
-      console.log(error)
-      throw new HttpException("Unable to delete User", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    // Now delete the user
+    await this.prisma.user.delete({
+      where: { id: userId }
+    });
+
+    return { message: "User deleted successfully" };
+  } catch (error) {
+    console.log(error);
+    throw new HttpException("Unable to delete User", HttpStatus.INTERNAL_SERVER_ERROR);
   }
+}
+
 
   async editUser(userId: number, dto: EditUserDto) {
     const user = await this.prisma.user.update({
