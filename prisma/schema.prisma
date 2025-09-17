@@ -219,6 +219,7 @@ model Challenge {
   difficulty   String
   useEditor    Boolean                 @default(false)
   instructions ChallengeInstructions[]
+  documentUrl  String?   
   likesList    ChallengeLike[]
   solutions    ChallengeSolutions[]
   completions  CompletedChallenges[]

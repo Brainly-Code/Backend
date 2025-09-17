@@ -1,18 +1,27 @@
 /* eslint-disable prettier/prettier */
-import { BadRequestException, Body, Controller, Get, Param, Patch,Post, Put, Delete } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch,Post, Put, Delete, UseInterceptors, UploadedFile, UseGuards} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ChallengesService } from './challenges.service';
 import { CreateChallengeDto } from './dto/createChallenge.dto';
 import { CreateChallengeCompleter, CreateChallengeInstructionDto, CreateChallengeSolutionDto } from './dto';
+import { JwtGuard } from 'src/guard';
 
 @Controller('challenges')
 export class ChallengesController {
-  constructor( private challengeService: ChallengesService ){}
-  
-  @Post()
-  createChallenge(@Body() dto: CreateChallengeDto) {
-    return this.challengeService.createChallenge(dto);
-  }
-  
+  constructor( private challengeService: ChallengesService,
+    private cloudinaryService: CloudinaryService, ){}
+   
+@Post()
+@UseInterceptors(FileInterceptor('file'))
+async createChallenge(
+  @UploadedFile() file: Express.Multer.File,
+  @Body() dto: CreateChallengeDto,
+) {
+  return this.challengeService.createChallenge(dto, file);
+}
+
+  @UseGuards(JwtGuard)
   @Patch(':id/like')
   toggleLike(
     @Param('id') id: string,
@@ -58,6 +67,11 @@ export class ChallengesController {
   @Delete('/instruction/:id')
   deleteChallengeInstruction(@Param('id') id: string) {
     return this.challengeService.deleteChallengeInstruction(id)
+  }
+
+  @Delete(':id')
+  async deleteChallenge(@Param('id') id: string) {
+    return this.challengeService.deleteChallenge(id);
   }
 
   @Post('solution')

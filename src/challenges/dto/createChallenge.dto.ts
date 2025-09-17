@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsString, IsOptional } from "class-validator";
 
 export class CreateChallengeDto {
   @IsNotEmpty()
@@ -21,4 +21,8 @@ export class CreateChallengeDto {
   @IsNotEmpty()
   @IsString()
   duration!: string;
+
+  @IsOptional()
+  @IsString()
+  documentUrl?: string;
 }
