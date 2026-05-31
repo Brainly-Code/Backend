@@ -1,0 +1,99 @@
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { Request, Response } from 'express';
+import { AuthService } from './autho.service';
+import { ConfigService } from '@nestjs/config';
+
+@Controller('autho')
+export class AuthController {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) { }
+
+  // Google OAuth
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() { }
+
+  @Get('google/redirect')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    try {
+      if (!req.user) throw new Error('No user data received from Google OAuth');
+      const oauthUser = {
+        email: (req.user as any).email,
+        name: (req.user as any).name,
+        photo: (req.user as any).photo,
+        provider: 'google' as 'google',
+      };
+      const { access_token, refresh_token } = await this.authService.validateOAuthLogin(oauthUser);
+
+      const isProd = process.env.NODE_ENV === 'production';
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+      console.log('DEBUG: ConfigService FRONTEND_URL:', this.configService.get('FRONTEND_URL'));
+      console.log('DEBUG: process.env.FRONTEND_URL:', process.env.FRONTEND_URL);
+      console.log('DEBUG: Final redirect URL:', `${frontendUrl}/oauth-success?token=${access_token}`);
+      return res.redirect(`${frontendUrl}/oauth-success?token=${access_token}`);
+    } catch (err: any) {
+      const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:5173';
+      return res.redirect(
+        `${frontendUrl}/auth/error?message=${encodeURIComponent(err.message)}`,
+      );
+    }
+  }
+
+  // GitHub OAuth
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  async githubAuth() { }
+
+  @Get('github/redirect')
+  @UseGuards(AuthGuard('github'))
+  async githubAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    try {
+      if (!req.user) throw new Error('No user data received from GitHub OAuth');
+      const user = req.user as any;
+      let email = user.email;
+      if (!email && user.emails && user.emails.length > 0) {
+        const primaryEmail = user.emails.find((e: any) => e.primary);
+        email = primaryEmail ? primaryEmail.value : user.emails[0].value;
+      }
+      if (!email) {
+        email = `${user.username}@github.local`;
+      }
+      const oauthUser = {
+        email,
+        name: user.name || user.displayName || user.username,
+        photo: user.photo || user.avatar_url || user._json?.avatar_url,
+        provider: 'github' as 'github',
+        githubId: user.id,
+        username: user.username,
+      };
+      const { access_token, refresh_token } = await this.authService.validateOAuthLogin(oauthUser);
+
+      const isProd = process.env.NODE_ENV === 'production';
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      const frontendUrl = this.configService.get('FRONTEND_URL');
+      return res.redirect(`${frontendUrl}/oauth-success?token=${access_token}`);
+    } catch (err: any) {
+      const frontendUrl = this.configService.get('FRONTEND_URL');
+      return res.redirect(
+        `${frontendUrl}/auth/error?message=${encodeURIComponent(err.message)}`,
+      );
+    }
+  }
+}

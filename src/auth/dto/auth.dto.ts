@@ -1,0 +1,46 @@
+/* eslint-disable prettier/prettier */
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEmail, IsNotEmpty, IsString, IsEnum, IsOptional, IsStrongPassword, IsIn } from "class-validator";
+
+export class AuthDto {
+  @ApiProperty({
+    description: "User email",
+    name: "izere@gmail.com",
+    required: true
+  })
+  @IsEmail()
+  @IsNotEmpty()
+  email!: string;
+
+  @ApiProperty({
+    description: "User password",
+    name: "izere12",
+    required: true
+  })
+  @IsStrongPassword(
+      { minLength: 6, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 },
+  { message: "Password must be at least 6 chars, include upper/lowercase, number, and symbol" }
+  )
+  @IsString()
+  @IsNotEmpty()
+  password!: string;
+
+  @ApiProperty({
+    description: "User's name",
+    name: "Izere",
+    required: true
+  })
+  @IsString()
+  @IsOptional()
+  username!: string;
+  
+  @ApiProperty({
+    description: "User role",
+    name: "TEACHER",
+    required: true,
+    enum: ["ADMIN", "USER", "SUPERADMIN"]
+  })
+  @IsOptional()
+  @IsIn(["ADMIN", "USER", "SUPERADMIN"])
+  role?: "ADMIN" | "USER" | "SUPERADMIN";
+}

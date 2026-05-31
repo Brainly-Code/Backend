@@ -1,0 +1,50 @@
+import {
+  WebSocketGateway,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+
+@WebSocketGateway({
+  cors: {
+    origin: [
+      'http://localhost:5173',
+      'https://frontend-mdy5.onrender.com',
+      'https://brainly-code.onrender.com',
+      'https://brainlycode.dpdns.org',
+      'https://brainlycode.dpdns.org/'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+})
+export class ChatGateway {
+  @WebSocketServer()
+  server!: Server;
+
+  @SubscribeMessage('joinRoom')
+  handleJoinRoom(
+    @MessageBody() roomId: string,
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(roomId);
+  }
+
+  @SubscribeMessage('sendDM')
+  handleSendDM(@MessageBody() data: any) {
+    const { senderId, receiverId, content, type } = data;
+    const roomId = [senderId, receiverId].sort().join('-'); // unique room
+
+    const message = {
+      senderId: senderId,
+      receiverId: receiverId,
+      content,
+      type,
+      id: Date.now(),
+    };
+
+    this.server.to(roomId).emit('newDM', message);
+  }
+}

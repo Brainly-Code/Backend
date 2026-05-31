@@ -1,0 +1,65 @@
+[33ma237b455[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: commit: .
+[33m2e724503[m HEAD@{1}: commit: .
+[33m7e7846ce[m HEAD@{2}: commit: .
+[33mbd9cc127[m HEAD@{3}: pull origin main: Merge made by the 'ort' strategy.
+[33m3b3d6799[m HEAD@{4}: commit: .
+[33m9f97d7eb[m HEAD@{5}: commit: Secured get users route
+[33mb7d5446a[m HEAD@{6}: commit: challenge updates
+[33m900954c6[m HEAD@{7}: pull origin main: Fast-forward
+[33m99d025c1[m HEAD@{8}: commit: .
+[33m55eeaa37[m HEAD@{9}: commit: .
+[33m690597f5[m HEAD@{10}: commit: .
+[33m02360e15[m HEAD@{11}: commit: .
+[33ma68a221f[m HEAD@{12}: commit: Solving deployment issues
+[33m7a85bb37[m HEAD@{13}: commit: .
+[33mb9fed9f0[m HEAD@{14}: commit: .
+[33me9f2eee2[m HEAD@{15}: commit: Deployment domain
+[33mae134808[m HEAD@{16}: commit: final update on normal auths
+[33m036728aa[m HEAD@{17}: commit: updated login logic
+[33mde617e21[m HEAD@{18}: pull origin main: Merge made by the 'ort' strategy.
+[33m8c638740[m HEAD@{19}: commit: auth trial
+[33m9687b24f[m HEAD@{20}: commit: Google and github login
+[33m1c13b64c[m HEAD@{21}: pull origin main: Merge made by the 'ort' strategy.
+[33m9dff4545[m HEAD@{22}: commit: .
+[33md1ba3766[m HEAD@{23}: commit: .
+[33m20b82266[m HEAD@{24}: commit: changed to allowing cross-cors:
+[33mb9d8bfc4[m HEAD@{25}: commit: .
+[33mbd634ada[m HEAD@{26}: commit: deployment fix
+[33md69e9e19[m HEAD@{27}: pull origin main: Fast-forward
+[33mfd621937[m HEAD@{28}: commit: fixed security issues
+[33m58ddda78[m HEAD@{29}: commit: Signing in issues
+[33m7c48c2c4[m HEAD@{30}: commit: [+]:google redirect
+[33maaee956e[m HEAD@{31}: commit: fix: google and github
+[33m72aed4ae[m HEAD@{32}: commit: fix: github and google login and registration
+[33m731edd6a[m HEAD@{33}: commit: reduced the minLength
+[33m4bbc41b3[m HEAD@{34}: commit: Password restriction and security
+[33m92a19d5d[m HEAD@{35}: commit: finishing touches
+[33m2dea0b12[m HEAD@{36}: pull origin main: Fast-forward
+[33mec8041c5[m HEAD@{37}: commit: fix: backend deployment
+[33m92772fce[m HEAD@{38}: commit: deployment
+[33m2732bc7c[m HEAD@{39}: pull origin main: Merge made by the 'ort' strategy.
+[33ma9bba2b5[m HEAD@{40}: commit: Deployment
+[33ma8f5f281[m HEAD@{41}: commit: Lets see again
+[33m72c7204d[m HEAD@{42}: commit: lets see
+[33mbd455d12[m HEAD@{43}: pull origin main: Merge made by the 'ort' strategy.
+[33m292289c2[m HEAD@{44}: commit: unread messages
+[33mb553e583[m HEAD@{45}: commit: .
+[33mbf8afa21[m HEAD@{46}: commit: New commit for unread messages
+[33m010d333f[m HEAD@{47}: commit: fix completion
+[33mbfe98f00[m HEAD@{48}: commit: fix completion
+[33m57821fc4[m HEAD@{49}: pull origin main: Fast-forward
+[33m0c3c7ac0[m HEAD@{50}: commit: fix: logout
+[33m61655528[m HEAD@{51}: commit: updated completion
+[33m7f291b80[m HEAD@{52}: commit: fix: challenges completion
+[33m1fe1598b[m HEAD@{53}: commit: addition: time and usersInfo when fetching challenge completer
+[33mf10adf18[m HEAD@{54}: commit: add: challenge completions
+[33m9bc7abd9[m HEAD@{55}: pull origin main: Fast-forward
+[33m32143821[m HEAD@{56}: commit: fix: redirect
+[33me7e220b8[m HEAD@{57}: commit: google redirection
+[33m8328854e[m HEAD@{58}: pull: Merge made by the 'ort' strategy.
+[33m9c2f19f0[m HEAD@{59}: commit: add: challengeSolution and challengeInstructions
+[33m162fca60[m HEAD@{60}: commit: Add: challengeInstructions and solutions
+[33m52cf70dc[m HEAD@{61}: commit: pull
+[33m380b9a7b[m HEAD@{62}: pull origin main: Fast-forward
+[33mb182f355[m HEAD@{63}: commit: fix: Google and GitHub signin
+[33maf0ae9ee[m HEAD@{64}: clone: from https://github.com/Brainly-Code/Backend

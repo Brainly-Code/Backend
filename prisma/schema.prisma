@@ -1,0 +1,367 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  Int                   @id @default(autoincrement())
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  email               String                @unique
+  hash                String
+  username            String?
+  role                Role?                 @default(USER)
+  isPremium           Boolean               @default(false)
+  courseId            Int?
+  photo               String?
+  provider            String                @default("local")
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  ChallengeLike       ChallengeLike[]
+  CompletedChallenges CompletedChallenges[]
+  createdCourses      Course[]              @relation("CreatedCourses")
+  courseLikes         CourseLike[]
+  ratings             CourseRating[]
+  receivedMessages    Message[]             @relation("ReceivedMessages")
+  sentMessages        Message[]             @relation("SentMessages")
+  MiniModuleProgress  MiniModuleProgress[]
+  progress            UserCourseProgress[]
+  userLessonProgress  UserLessonProgress[]
+  image               UserProfileImage?
+  userModuleProgress  userModuleProgress[]
+  course              Course?               @relation(fields: [courseId], references: [id])
+
+  @@map("users")
+}
+
+model UserProfileImage {
+  id     Int    @id @default(autoincrement())
+  path   String
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Course {
+  id                  Int                   @id @default(autoincrement())
+  title               String                @unique
+  category            String
+  level               Level
+  duration            String                @default("")
+  studentsCount       Int                   @default(0)
+  rating              Float                 @default(0.0)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  description         String
+  likes               Int                   @default(0)
+  completions         Int                   @default(0)
+  creatorId           Int
+  creator             User                  @relation("CreatedCourses", fields: [creatorId], references: [id])
+  likedBy             CourseLike[]
+  modules             CourseModule[]
+  ratings             CourseRating[]
+  resources           CourseResource[]
+  progress            UserCourseProgress[]
+  videos              Video[]
+  users               User[]
+  completedChallenges CompletedChallenges[] @relation("CompletedChallengesToCourse")
+}
+
+model CourseLike {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  courseId  Int
+  createdAt DateTime @default(now())
+  course    Course   @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, courseId])
+}
+
+model UserCourseProgress {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  courseId    Int
+  currentStep Int      @default(0)
+  completed   Boolean  @default(false)
+  startedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  rating      Int?
+  course      Course   @relation(fields: [courseId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model CourseModule {
+  id          Int                  @id @default(autoincrement())
+  courseId    Int
+  title       String
+  number      Int
+  course      Course               @relation(fields: [courseId], references: [id])
+  miniModules MiniModule[]
+  progress    userModuleProgress[]
+
+  @@unique([courseId, number])
+}
+
+model userModuleProgress {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  courseModuleId Int
+  currentStep    Int          @default(0)
+  completed      Boolean      @default(false)
+  startedAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  courseId       Int?
+  courseModule   CourseModule @relation(fields: [courseModuleId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+}
+
+model Video {
+  id       Int    @id @default(autoincrement())
+  courseId Int
+  title    String
+  number   Int
+  url      String
+  course   Course @relation(fields: [courseId], references: [id])
+
+  @@unique([courseId, number])
+}
+
+model MiniModule {
+  id             Int                  @id @default(autoincrement())
+  courseModuleId Int
+  title          String
+  number         Int
+  lessons        Lesson[]
+  lessonVideos   LessonVideo[]
+  courseModule   CourseModule         @relation(fields: [courseModuleId], references: [id])
+  progress       MiniModuleProgress[]
+
+  @@unique([courseModuleId, number])
+}
+
+model MiniModuleProgress {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  miniModuleId Int
+  currentStep  Int        @default(0)
+  completed    Boolean    @default(false)
+  startedAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  miniModule   MiniModule @relation(fields: [miniModuleId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+}
+
+model Lesson {
+  id           Int                  @id @default(autoincrement())
+  title        String
+  more         String?
+  example      String?
+  note         String?
+  assignment   String
+  number       Int
+  miniModuleId Int
+  explanation  String
+  miniModule   MiniModule           @relation(fields: [miniModuleId], references: [id])
+  solutions    LessonSolution?
+  progress     UserLessonProgress[]
+}
+
+model LessonVideo {
+  id           Int        @id @default(autoincrement())
+  title        String
+  number       Int
+  url          String
+  miniModuleId Int
+  miniModule   MiniModule @relation(fields: [miniModuleId], references: [id])
+
+  @@unique([miniModuleId, number])
+}
+
+model LessonSolution {
+  id       Int    @id @default(autoincrement())
+  solution String
+  lessonId Int    @unique
+  lesson   Lesson @relation(fields: [lessonId], references: [id])
+}
+
+model UserLessonProgress {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  lessonId    Int
+  currentStep Int      @default(0)
+  completed   Boolean  @default(false)
+  startedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model CourseRating {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  courseId  Int
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  course    Course   @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Challenge {
+  id           Int                     @id @default(autoincrement())
+  title        String
+  description  String
+  duration     String
+  relation     String?
+  likes        Int                     @default(0)
+  difficulty   String
+  useEditor    Boolean?                @default(false)
+  documentUrl  String?
+  useInput     Boolean?                @default(false)
+  takesUrl     Boolean?                @default(false)
+  marks        Int                     @default(0)
+  instructions ChallengeInstructions[]
+  likesList    ChallengeLike[]
+  solutions    ChallengeSolutions[]
+  completions  CompletedChallenges[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  message   String
+  userId    Int?
+  createdAt DateTime @default(now())
+}
+
+model CourseResource {
+  id        Int      @id @default(autoincrement())
+  courseId  Int
+  title     String
+  number    Int
+  url       String
+  type      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  course    Course   @relation(fields: [courseId], references: [id])
+
+  @@unique([courseId, number])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  content    String
+  type       String   @default("text")
+  createdAt  DateTime @default(now())
+  read       Boolean  @default(false)
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+}
+
+model ChallengeLike {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, challengeId])
+}
+
+model ChallengeInstructions {
+  id          Int       @id @default(autoincrement())
+  number      Int
+  instruction String
+  challengeId Int
+  completed   Boolean   @default(false)
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+
+  @@unique([challengeId, number])
+}
+
+model ChallengeSolutions {
+  id          Int       @id @default(autoincrement())
+  number      Int
+  solution    String
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+
+  @@unique([challengeId, number])
+}
+
+model CompletedChallenges {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  challengeId  Int
+  createdAt    DateTime  @default(now())
+  url          String?
+  userSolution String?
+  correct      Status    @default(JUST)
+  marks        Int       @default(0)
+  challenge    Challenge @relation(fields: [challengeId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+  Course       Course[]  @relation("CompletedChallengesToCourse")
+}
+
+model KnowledgeBase {
+  id         Int                    @id @default(autoincrement())
+  title      String
+  content    String
+  type       String
+  sourceId   Int?
+  sourceType String?
+  embedding  Unsupported("vector")?
+  metadata   Json?
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+
+  @@map("knowledge_base")
+}
+
+model ChatSession {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  sessionId String   @unique
+  messages  Json
+  context   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("chat_sessions")
+}
+
+model FineTuningJob {
+  id           Int      @id @default(autoincrement())
+  name         String
+  status       String
+  modelId      String?
+  trainingData Json
+  results      Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("fine_tuning_jobs")
+}
+
+enum Role {
+  ADMIN
+  USER
+  SUPERADMIN
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum Status {
+  WRIGHT
+  WRONG
+  JUST
+}
