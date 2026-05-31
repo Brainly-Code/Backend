@@ -11,8 +11,7 @@ import 'dotenv/config';
 
 const PORT = process.env.PORT || 3000;
 
-async function bootstrap() {
-  console.log('Starting NestJS application...');
+async function setupApp() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.useGlobalPipes(
@@ -53,11 +52,32 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
 
+  return app;
+}
+
+async function bootstrap() {
+  console.log('Starting NestJS application...');
+  const app = await setupApp();
+  
   const server = app.getHttpServer();
   server.setTimeout(20 * 60 * 1000); 
 
-await app.listen(PORT);
+  await app.listen(PORT);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
-void bootstrap();
+// Only run the server automatically if we are NOT on Vercel
+if (!process.env.VERCEL) {
+  void bootstrap();
+}
+
+// Export a serverless handler for Vercel
+let cachedServer: any;
+export default async function (req: any, res: any) {
+  if (!cachedServer) {
+    const app = await setupApp();
+    await app.init();
+    cachedServer = app.getHttpAdapter().getInstance();
+  }
+  return cachedServer(req, res);
+}
