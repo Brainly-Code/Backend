@@ -22,7 +22,9 @@ async function setupApp() {
     }),
   );
 
-  app.use(cookieParser());
+  // Handle ESM/CommonJS interop issue on Vercel
+  const cookieMiddleware = (cookieParser as any).default || cookieParser;
+  app.use(cookieMiddleware());
 
   app.useStaticAssets(resolve(__dirname, '.', 'uploads'), {
     prefix: '/uploads/',
